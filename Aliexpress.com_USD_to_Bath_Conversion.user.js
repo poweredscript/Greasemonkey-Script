@@ -6,13 +6,8 @@
 // @author  	Apichai Pashaiam
 // @downloadURL https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @updateURL 	https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version     1
-// @include     https://aliexpress.com/*
-// @include     http://aliexpress.com/*
-// @include     https://www.aliexpress.com/*
-// @include     http://www.aliexpress.com/*
-// @include     http://trade.aliexpress.com/*
-// @include     https://trade.aliexpress.com/*
+// @version     1.1
+// @include     *aliexpress.com/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getResourceText
@@ -40,10 +35,12 @@ const donate = true; //สนับสนุนการพัฒนา
 
 var htmlXRates = "";
 var baht = 0;
-// @grant        unsafeWindow
+// @exclude     *www.aliexpress.com/*
+// @exclude     http://www.aliexpress.com/*
 // @run-at       document-end
 // @run-at       document-start
 // @run-at 		 document-idle
+// @grant        unsafeWindow
 // simplified version
 function resourceText(url, callback, postfields) {
 	var options = {
@@ -244,50 +241,12 @@ function getShippingPrice(ele){
 }
 
 function checkTHB()
-{
-	// if(includeShippingPrice){
-		// var href = window.location.href;
-		// if(href.indexOf("wholesale") != -1){
-			// var eles = evaluateXPath(document, "//div[@class='item']");//"//li[@class='list-item  ']"
-			// alert(eles.length);
-			// for(var i = 0; i < eles.length; i++) {
-				// var ele = eles[i];
-				// var shippingPrice = ele.getElementsByClassName("pnl-shipping");//evaluateXPath(ele, "//dl[@class='pnl-shipping']");//
-				// if(shippingPrice.length > 0){
-					// alert(shippingPrice[0].textContent.replace(/[^\d\.]/ig, ""));
-				// } 
-			// }
-		// }
-	// }	
-	
-	// //Price Currency
+{	var href = window.location.href;
+	//alert(excludeUrl(href));
+	if(!excludeUrl(href)){
+		return;
+	}
 	hideEle('//span[@itemprop="priceCurrency"]');
-	// //Low Price
-	// converterAllToThb('//span[@itemprop="lowPrice"]');	
-	// //High Price
-	// converterAllToThb('//span[@itemprop="highPrice"]');
-	// // 11-11-201x
-	// converterAllToThb('//span[@class="double11-preview-mark-price"]');
-	// converterAllToThb('//span[@class="bigsale-content-price"]');
-	// //Search Results
-	// converterAllToThb('//span[@itemprop="price"]');	
-	// //big-sale-price  price-gallery 
-	// converterAllToThb('//span[@class="big-sale-price  price-gallery "]');	
-	// converterAllToThb('//span[@class="p4p-price-list"]');
-	// //Buyers who bought this item also bought
-	// converterAllToThb('//span[@class="notranslate"]');
-	
-	// //Your Shopping Cart Page
-	// converterAllToThb('//span[@class="value notranslate"]');
-	// converterAllToThb('//span[@class="product-price-total ui-cost notranslate"]');
-	// converterAllToThb('//span[@class="default-price notranslate"]');
-	// converterAllToThb('//span[@class="total-price ui-cost notranslate"]');
-	
-	// // // Store Page
-	// converterAllToThb('//div[@class="price"]');
-	// converterAllToThb('//div[@class="bigsale-preview-price"]');
-	// //converterAllToThb('//span[@class=""]');
-	//alert("1");
 	converterAllToThb('//span[@class="p-price"]');
 	converterAllToThb('//*[contains(text(),"' + sourceSymbol + '")]');
 }
@@ -341,11 +300,21 @@ window.onload = function(){
 		var allUrls = evaluateXPath(document, "//a");
 		for(var i = 0; i < allUrls.length; i++) {
 			var url = allUrls[i];
-			var href = url.href;
-			
-			if(href.indexOf("alibaba.com") == -1 
+			var href = url.href;			
+			if(excludeUrl(href))
+			{
+				var myAffUrl = "https://redirect.viglink.com?key=32636576ec65e78c67d41892f6dc6f0f&u=" + encodeURIComponent(url);
+				url.href = myAffUrl; 
+				url.alt = url;
+			}	
+		}
+	}
+}
+//https://www.aliexpress.com/item/True-Sine-Wave-Solar-Power-Inverter-DC-24V-to-AC-230V-2KW-2000W/537347311.html?ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10084_10083_10080_10082_10081_10060_10061_10062_10056_10037_10055_10054_10059_10032_10078_10079_10077_10073_10070_10052_423_10050_10051,searchweb201603_1&btsid=9ce3d69d-d6d5-488a-952e-0b1a65c682e9
+function excludeUrl(href){	
+	return (href.indexOf("alibaba.com") == -1 
 			&& href.indexOf("shopcart") == -1 
-			&& href.indexOf("my.aliexpress") == -1 
+			//&& href.indexOf("my.aliexpress") == -1 
 			&& href.indexOf("category") == -1 
 			&& href.indexOf("page=") == -1
 			&& href.indexOf("javascrpt") == -1
@@ -356,16 +325,12 @@ window.onload = function(){
 			&& href.indexOf("mailto") == -1
 			&& href.indexOf("SortType") == -1
 			&& href.indexOf("msg.") == -1
-			&& href.indexOf("SortType") == -1
 			&& href.indexOf("&g=n&") == -1
 			&& href.indexOf("&g=y&") == -1
 			&& href.indexOf("32636576ec65e78c67d41892f6dc6f0f") == -1
-			)
-			{
-				var myAffUrl = "https://redirect.viglink.com?key=32636576ec65e78c67d41892f6dc6f0f&u=" + encodeURIComponent(url);
-				url.href = myAffUrl; 
-				url.alt = url;
-			}	
-		}
-	}
+			&& href.indexOf("logout") == -1 
+			&& href.indexOf("xlogin") == -1 
+			&& href.indexOf("iframe_delete") == -1
+			&& href.indexOf("success_proxy") == -1			
+			&& href.indexOf("security") == -1);
 }

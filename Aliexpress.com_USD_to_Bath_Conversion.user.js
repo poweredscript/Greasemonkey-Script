@@ -4,8 +4,8 @@
 // @description Aliexpress.com USD to Bath Conversion
 // @copyright   @2016
 // @author  	Apichai Pashaiam
-// @downloadURL https://openuserjs.org/install/harshilsharma63/TDF_Improved_Dark_Skin.user.js
-// @updateURL 	https://openuserjs.org/install/harshilsharma63/TDF_Improved_Dark_Skin.user.js
+// @downloadURL https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
+// @updateURL 	https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @version     1
 // @include     https://aliexpress.com/*
 // @include     http://aliexpress.com/*

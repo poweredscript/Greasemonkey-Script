@@ -14,7 +14,6 @@
 // @include     http://trade.aliexpress.com/*
 // @include     https://trade.aliexpress.com/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
-// @grant        unsafeWindow
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getResourceText
 // @grant        GM_getResourceURL
@@ -41,6 +40,7 @@ const donate = true; //สนับสนุนการพัฒนา
 
 var htmlXRates = "";
 var baht = 0;
+// @grant        unsafeWindow
 // @run-at       document-end
 // @run-at       document-start
 // @run-at 		 document-idle

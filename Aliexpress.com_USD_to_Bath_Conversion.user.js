@@ -1,29 +1,30 @@
 // ==UserScript==
-// @name        Aliexpress.com USD to Bath Conversion
-// @namespace   http://ubotplugin.com
-// @description Aliexpress.com USD to Bath Conversion
-// @copyright   @2016
-// @author  	Apichai Pashaiam
-// @downloadURL https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @updateURL 	https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version     1.1
-// @include     *aliexpress.com/*
-// @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
-// @grant        GM_xmlhttpRequest
-// @grant        GM_getResourceText
-// @grant        GM_getResourceURL
-// @grant        GM_getValue
-// @grant        GM_setValue
-// @run-at 		 document-idle
-// @grant        GM_openInTab
-// @grant        GM_registerMenuCommand
-// @grant        GM_addStyle
-// @grant		 GM_log
+// @name                Aliexpress.com USD to Bath Conversion
+// @namespace        http://ubotplugin.com
+// @description         Aliexpress.com USD to Bath Conversion
+// @copyright           @2016
+// @author  	            Apichai Pashaiam
+// @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
+// @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
+// @version             1.2
+// @license             Apache
+// @include             *aliexpress.com/*
+// @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
+// @grant               GM_xmlhttpRequest
+// @grant               GM_getResourceText
+// @grant               GM_getResourceURL
+// @grant               GM_getValue
+// @grant               GM_setValue
+// @grant               GM_openInTab
+// @grant               GM_registerMenuCommand
+// @grant               GM_addStyle
+// @grant	          GM_log
+// @grant               unsafeWindow
+// @run-at 	          document-idle
 // ==/UserScript==
 // Email: poweredscript@gmail.com
 // Website: http://ubotplugin.com
-// สคิปนี้มีแปลงลิ้งค์เป็น affiliate ของ viglink เพื่อสนับสนุนการพัฒนา แต่ถ้าคุณไม่ต้องการสนับสนุน คุณสามารถปิดมัน ที่ donate = false
-// Script is a link to an affiliate by viglink to support development. But if you do not want to support You can close it to donate = false.
+
 const source = "USD"; //สกุลเงินที่จะแปลง
 const taget = "THB"; //สกุลเงินที่จะแปลงไป
 const sourceSymbol = "$"; //สัญญาลักษ์สกุลเงินที่จะแปลง
@@ -31,17 +32,9 @@ const tagetSymbol = "฿"; //สัญญาลักษ์สกุลเงิ
 const showSourcePrice = true;
 const includeShippingPrice = true;
 const hideShippingCost = true; // ถ้าคุณเลือก "includeShippingPrice = true" คุณสามรถกำหนดให้ไม่ต้องแสดงค่าจัดส่งได้ ปรกติค่าคือ true.
-const donate = true; //สนับสนุนการพัฒนา
 
 var htmlXRates = "";
 var baht = 0;
-// @exclude     *www.aliexpress.com/*
-// @exclude     http://www.aliexpress.com/*
-// @run-at       document-end
-// @run-at       document-start
-// @run-at 		 document-idle
-// @grant        unsafeWindow
-// simplified version
 function resourceText(url, callback, postfields) {
 	var options = {
 		'url' : url,
@@ -75,27 +68,7 @@ function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-
-
-// Create our number formatter.
-// var formatter = new Intl.NumberFormat('th-TH', {
-  // style: 'currency',
-  // currency: 'THB',
-  // minimumFractionDigits: 2,
-// });
-
-// Number.prototype.formatMoney = function(decPlaces, thouSeparator, decSeparator) {
-    // var n = this,
-        // decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
-        // decSeparator = decSeparator == undefined ? "." : decSeparator,
-        // thouSeparator = thouSeparator == undefined ? "," : thouSeparator,
-        // sign = n < 0 ? "-" : "",
-        // i = parseInt(n = Math.abs(+n || 0).toFixed(decPlaces)) + "",
-        // j = (j = i.length) > 3 ? j % 3 : 0;
-    // return sign + (j ? i.substr(0, j) + thouSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thouSeparator) + (decPlaces ? decSeparator + Math.abs(n - i).toFixed(decPlaces).slice(2) : "");
-// };
-
-function formatDollar(num, decPlaces) {
+function formatMoney(num, decPlaces) {
     if(decPlaces > 0){
 		var p = num.toFixed(decPlaces).split(".");
 		return p[0].split("").reverse().reduce(function(acc, num, i, orig) 
@@ -109,10 +82,6 @@ function formatDollar(num, decPlaces) {
 			return  num + (i && !(i % 3) ? "," : "") + acc;
 		}, "");
 	}    
-}
-
-function formatMoney(num) {
-	return formatDollar(num, 0);
 }
 
 function usdToTHB(usds, shippingPrice) {	
@@ -130,13 +99,13 @@ function usdToTHB(usds, shippingPrice) {
 		{
 			val1 = usds[0].replace(/[^\d\.]/ig, "");			
 			val1 = parseFloat(val1) + shippingPrice;
-			val1Thb = formatMoney((val1 * baht));
+			val1Thb = formatMoney((val1 * baht), 0);
 			
 			val2 = usds[1].replace(/[^\d\.]/ig, "");
 			val2 = parseFloat(val2) + shippingPrice;			
-			val2Thb = formatMoney((val2 * baht));
+			val2Thb = formatMoney((val2 * baht), 0);
 			if(showSourcePrice){
-				bahtStr = tagetSymbol + val1Thb + ' - ' + val2Thb + ' (' + sourceSymbol + formatDollar(val1) + ' - ' + formatDollar(val2) + ')';
+			    bahtStr = tagetSymbol + val1Thb + ' - ' + val2Thb + ' (' + sourceSymbol + formatMoney(val1, 2) + ' - ' + formatMoney(val2, 2) + ')';
 			}else{
 				bahtStr = tagetSymbol + val1Thb + ' - ' + val2Thb;
 			}
@@ -146,9 +115,9 @@ function usdToTHB(usds, shippingPrice) {
 			val1 = usds[0].replace(/[^\d\.]/ig, "");
 			if(val1 == "") return "";			
 			val1 = parseFloat(val1) + shippingPrice;
-			val1Thb = formatMoney((val1 * baht));
+			val1Thb = formatMoney((val1 * baht), 0);
 			if(showSourcePrice){
-				bahtStr = tagetSymbol + val1Thb + ' (' + sourceSymbol + formatDollar(val1, 2) + ')';
+			    bahtStr = tagetSymbol + val1Thb + ' (' + sourceSymbol + formatMoney(val1, 2) + ')';
 			}else{
 				bahtStr = tagetSymbol + val1Thb;
 			}
@@ -158,9 +127,9 @@ function usdToTHB(usds, shippingPrice) {
     else {
 		val1 = parseFloat(usds + shippingPrice);
 		if(showSourcePrice){
-			bahtStr = tagetSymbol + formatMoney(parseFloat(val1 * baht)) + ' (' + sourceSymbol + formatDollar(val1) + ')';
+		    bahtStr = tagetSymbol + formatMoney(parseFloat(val1 * baht), 0) + ' (' + sourceSymbol + formatMoney(val1, 2) + ')';
 		}else{
-			bahtStr = tagetSymbol + formatMoney(parseFloat(val1 * baht));
+		    bahtStr = tagetSymbol + formatMoney(parseFloat(val1 * baht), 0);
 		}        
 		//alert("3: " + bahtStr);
     }
@@ -207,7 +176,7 @@ function converterAllToThb(xPath){
 	var eles = evaluateXPath(document, xPath);//alert(eles.length);
 	for(var i = 0; i < eles.length; i++) {
 		var ele = eles[i];// && ele.textContent.split(/\r\n|\r|\n/).length == 1
-		if(ele.textContent.indexOf(tagetSymbol) == -1){
+		if (!ele.textContent.includes(tagetSymbol)) {
 			if(includeShippingPrice){
 				ele.textContent = usdToTHB(ele.textContent, getShippingPrice(ele));
 			}
@@ -221,13 +190,13 @@ function getShippingPrice(ele){
 	var shippingPriceReport = 0;
 	if(includeShippingPrice){
 		var href = window.location.href;
-		if(href.indexOf("wholesale") != -1){
+		if (href.includes("wholesale")) {
 			var tmpEle = ele;
 			for(var i = 0; i < 10; i++) {
 				if(tmpEle == null || tmpEle == undefined) return 0;
 				var shippingPrice = tmpEle.getElementsByClassName("pnl-shipping");//alert(shippingPrice.length);
 				if(shippingPrice.length > 0){//alert(shippingPrice[0].textContent.replace(/[^\d\.]/ig, ""));
-					if(shippingPrice[0].textContent.indexOf(tagetSymbol) != -1) return 0;
+				    if (shippingPrice[0].textContent.includes(tagetSymbol)) return 0;
 					shippingPriceReport = parseFloat(shippingPrice[0].textContent.replace(/[^\d\.]/ig, ""));
 					if(hideShippingCost) shippingPrice[0].style.display = 'none';
 					return shippingPriceReport; 
@@ -296,41 +265,27 @@ window.onload = function(){
 			//alert("Error getElementById")
 		}
 	}); 
-	if(donate){	
-		var allUrls = evaluateXPath(document, "//a");
-		for(var i = 0; i < allUrls.length; i++) {
-			var url = allUrls[i];
-			var href = url.href;			
-			if(excludeUrl(href))
-			{
-				var myAffUrl = "https://redirect.viglink.com?key=32636576ec65e78c67d41892f6dc6f0f&u=" + encodeURIComponent(url);
-				url.href = myAffUrl; 
-				url.alt = url;
-			}	
-		}
-	}
 }
-//https://www.aliexpress.com/item/True-Sine-Wave-Solar-Power-Inverter-DC-24V-to-AC-230V-2KW-2000W/537347311.html?ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10084_10083_10080_10082_10081_10060_10061_10062_10056_10037_10055_10054_10059_10032_10078_10079_10077_10073_10070_10052_423_10050_10051,searchweb201603_1&btsid=9ce3d69d-d6d5-488a-952e-0b1a65c682e9
+
 function excludeUrl(href){	
-	return (href.indexOf("alibaba.com") == -1 
-			&& href.indexOf("shopcart") == -1 
-			//&& href.indexOf("my.aliexpress") == -1 
-			&& href.indexOf("category") == -1 
-			&& href.indexOf("page=") == -1
-			&& href.indexOf("javascrpt") == -1
-			&& href.indexOf("javascript") == -1
-			&& href.indexOf("login") == -1
-			&& href.indexOf("password") == -1
-			&& href.indexOf("email") == -1
-			&& href.indexOf("mailto") == -1
-			&& href.indexOf("SortType") == -1
-			&& href.indexOf("msg.") == -1
-			&& href.indexOf("&g=n&") == -1
-			&& href.indexOf("&g=y&") == -1
-			&& href.indexOf("32636576ec65e78c67d41892f6dc6f0f") == -1
-			&& href.indexOf("logout") == -1 
-			&& href.indexOf("xlogin") == -1 
-			&& href.indexOf("iframe_delete") == -1
-			&& href.indexOf("success_proxy") == -1			
-			&& href.indexOf("security") == -1);
+	return !(href.includes("alibaba.com")
+			|| href.includes("shopcart") 
+			|| href.includes("category") 
+			|| href.includes("page=")
+			|| href.includes("javascrpt")
+			|| href.includes("javascript")
+			|| href.includes("login")
+			|| href.includes("password")
+			|| href.includes("email")
+			|| href.includes("mailto")
+			|| href.includes("msg.")			
+			|| href.includes("32636576ec65e78c67d41892f6dc6f0f")
+			|| href.includes("logout") 
+			|| href.includes("xlogin") 
+			|| href.includes("iframe_delete")
+			|| href.includes("success_proxy")			
+			|| href.includes("security")
+            || href.includes("account")
+            || href.includes("membership")
+        );
 }

@@ -4,8 +4,8 @@
 // @description         Aliexpress.com Tracking Barcode Generator
 // @copyright           @2016
 // @author  	            Apichai Pashaiam
-// @downloadURL     https://github.com
-// @updateURL 	    https://github.com
+// @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
+// @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
 // @version             1.0
 // @license             Apache
 // @include             https://trade.aliexpress.com/orderList.htm

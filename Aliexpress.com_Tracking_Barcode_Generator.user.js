@@ -8,8 +8,7 @@
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
 // @version             1.2
 // @license             Apache
-// @include             https://trade.aliexpress.com/order_list.htm*
-// @include             http://trade.aliexpress.com/order_list.htm*
+// @include             *trade.aliexpress.com/order*
 // @grant               GM_xmlhttpRequest
 // @grant               GM_getResourceText
 // @grant               GM_getResourceURL

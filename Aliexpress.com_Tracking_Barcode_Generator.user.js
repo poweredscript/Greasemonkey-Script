@@ -6,9 +6,10 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
-// @version             1.0
+// @version             1.2
 // @license             Apache
-// @include             https://trade.aliexpress.com/orderList.htm
+// @include             https://trade.aliexpress.com/order_list.htm*
+// @include             http://trade.aliexpress.com/order_list.htm*
 // @grant               GM_xmlhttpRequest
 // @grant               GM_getResourceText
 // @grant               GM_getResourceURL
@@ -77,7 +78,7 @@ for (var i = 0; i < trackings.length; i++) {
             var result = htmlXRates.match(/Tracking number:<\/div>[\s\S]*?<\/div>[\s\S]*?<\/div>/g)[0];
             result = result.match(/<div class="item msg">.*?<\/div>/g)[0];
             result = result.replace(/(<div class="item msg">|<\/div>)/g, "");
-            //alert(result);
+           // alert(result);
             if (result.length > 5) {
 
                 var eleTrackingParent = eleTracking.parentElement;

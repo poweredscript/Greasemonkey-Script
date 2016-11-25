@@ -6,9 +6,10 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
-// @version             1.2
+// @version             1.3
 // @license             Apache
 // @include             *trade.aliexpress.com/order*
+// @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
 // @grant               GM_xmlhttpRequest
 // @grant               GM_getResourceText
 // @grant               GM_getResourceURL
@@ -23,6 +24,7 @@
 // ==/UserScript==
 // Email: poweredscript@gmail.com
 // Website: http://ubotplugin.com
+const qrCode = false;
 function resourceText(url, eleTracking, callback, postfields) {
     var options = {
         'url': url,
@@ -57,47 +59,47 @@ function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-
 function sleepFor(sleepDuration) {
     var now = new Date().getTime();
     while (new Date().getTime() < now + sleepDuration) { /* do nothing */ }
 }
 
-//http://track.aliexpress.com/logisticsdetail.htm?tradeId=80319479301398
-var trackings = document.getElementsByClassName("ui-button ui-button-normal button-logisticsTracking");
-for (var i = 0; i < trackings.length; i++) {
-    var eleTracking = trackings[i];
-    var trackingId = eleTracking.getAttribute("orderid");
-    //alert(trackingId);
-    //GetTrackingNumber(trackingId);
-    //alert(GetTrackingNumber(trackingId));
-    if (trackingId != "") {
-        resourceText('http://track.aliexpress.com/logisticsdetail.htm?tradeId=' + trackingId, eleTracking, function (htmlXRates, eleTracking) {
-            //alert(htmlXRates);
-            var result = htmlXRates.match(/Tracking number:<\/div>[\s\S]*?<\/div>[\s\S]*?<\/div>/g)[0];
-            result = result.match(/<div class="item msg">.*?<\/div>/g)[0];
-            result = result.replace(/(<div class="item msg">|<\/div>)/g, "");
-           // alert(result);
-            if (result.length > 5) {
-
-                var eleTrackingParent = eleTracking.parentElement;
-
-                var para = document.createElement("P");
-                var t = document.createTextNode(result);
-                para.appendChild(t);
-                eleTrackingParent.appendChild(para);
-
-                var img = document.createElement("img");
-                img.src = "http://www.qr-code-generator.com/phpqrcode/getCode.php?cht=qr&chs=150x150&choe=UTF-8&chld=L|0&chl=" + result;
-                img.style.width = "150px";
-                img.style.height = "150px";
-                img.alt = result;
-                img.title = result;
-                eleTrackingParent.appendChild(img);
-                //eleTracking.style.height = "205px";
-                //return result;
+window.addEventListener("load", pageFullyLoaded);
+function pageFullyLoaded() {
+    //http://track.aliexpress.com/logisticsdetail.htm?tradeId=80319479301398
+    var orderActions = document.getElementsByClassName("order-action");
+    for (var i = 0; i < orderActions.length; i++) {
+        var orderAction = orderActions[i];
+        var reAddToCarts = orderAction.getElementsByClassName("ui-button ui-button-normal button-reAddToCart");
+        if (reAddToCarts.length == 0) {
+            var trackings = orderAction.getElementsByClassName("ui-button ui-button-normal button-logisticsTracking");
+            for (var j = 0; j < trackings.length; j++) {
+                var eleTracking = trackings[j];
+                var trackingId = eleTracking.getAttribute("orderid");
+                if (trackingId != "") {
+                    resourceText('http://track.aliexpress.com/logisticsdetail.htm?tradeId=' + trackingId, eleTracking, function (htmlXRates, eleTrackingOut) {
+                        var result = htmlXRates.match(/Tracking number:<\/div>[\s\S]*?<\/div>[\s\S]*?<\/div>/g)[0];
+                        result = result.match(/<div class="item msg">.*?<\/div>/g)[0];
+                        result = result.replace(/(<div class="item msg">|<\/div>)/g, "");
+                     
+                        if (result.length > 5) {
+                            var eleTrackingParent = eleTrackingOut.parentElement;
+                            var img = document.createElement("img");
+                            if (qrCode) {
+                                img.src = "http://www.qr-code-generator.com/phpqrcode/getCode.php?cht=qr&chs=150x150&choe=UTF-8&chld=L|0&chl=" + result;
+                                img.style.width = "150px";
+                                img.style.height = "150px";
+                            } else {
+                                img.src = "http://www.barcode-generator.org/zint/api.php?bc_number=20&bc_data=" + result;
+                                img.style.height = "95px";
+                            }
+                            img.alt = result;
+                            img.title = result;
+                            eleTrackingParent.appendChild(img);
+                        }
+                    });
+                }
             }
-        });
-        //break;
+        }
     }
 }

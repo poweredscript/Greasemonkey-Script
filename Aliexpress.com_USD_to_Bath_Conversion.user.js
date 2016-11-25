@@ -6,7 +6,7 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version             1.3
+// @version             1.4
 // @license             Apache
 // @include             *aliexpress.com/*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -201,8 +201,8 @@ function converterAllToThb(xPath){
 	for(var i = 0; i < eles.length; i++) {
 		var ele = eles[i];
 		if (!ele.textContent.includes(prefixTagetSymbol) && !ele.textContent.includes(suffixTagetSymbol)) {
-			if(includeShippingPrice){
-				ele.textContent = usdToTHB(ele.textContent, getShippingPrice(ele));
+		    if (includeShippingPrice) {
+		        ele.textContent = usdToTHB(ele.textContent, getShippingPrice(ele));
 			}
 			else{
 				ele.textContent = usdToTHB(ele.textContent, 0);
@@ -212,24 +212,26 @@ function converterAllToThb(xPath){
 }
 function getShippingPrice(ele){
 	var shippingPriceReport = 0;
-	if(includeShippingPrice){
-		var href = window.location.href;
-		if (href.includes("wholesale") || href.includes("SearchText")) {
-			var tmpEle = ele;
-			for(var i = 0; i < 3; i++) {
-				if(tmpEle == null || tmpEle == undefined) return 0;
-				var shippingPrice = tmpEle.getElementsByClassName("pnl-shipping");
-				if(shippingPrice.length > 0){
-				    if (shippingPrice[0].textContent.includes(prefixTagetSymbol) || !ele.textContent.includes(suffixTagetSymbol)) return 0;
-					shippingPriceReport = parseFloat(shippingPrice[0].textContent.replace(/[^\d\.]/ig, ""));
-					if(hideShippingCost) shippingPrice[0].style.display = 'none';
-					return shippingPriceReport; 
-				}else{
-					tmpEle = tmpEle.parentElement;
-				}
-			}			 
-		}
-	} 
+	var href = window.location.href;
+	if (href.includes("wholesale") || href.includes("SearchText")) {
+	    var tmpEle = ele;
+	    for (var i = 0; i < 4; i++) {
+	        if (tmpEle == null || tmpEle == undefined) return 0;
+	        var shippingPrice = tmpEle.getElementsByClassName("pnl-shipping");
+	        if (shippingPrice.length > 0) {
+	            if (shippingPrice[0].textContent.includes(prefixTagetSymbol) || ele.textContent.includes(suffixTagetSymbol)) {
+	                return 0;
+	            }
+	            shippingPriceReport = parseFloat(shippingPrice[0].textContent.replace(/[^\d\.]/ig, ""));
+	            if (hideShippingCost) {
+	                shippingPrice[0].style.display = 'none';
+	            }
+	            return shippingPriceReport;
+	        } else {
+	            tmpEle = tmpEle.parentElement;
+	        }
+	    }
+	}
 	return 0;
 }
 

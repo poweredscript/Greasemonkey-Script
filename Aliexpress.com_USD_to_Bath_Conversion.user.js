@@ -6,7 +6,7 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version             1.8
+// @version             1.9
 // @license             Apache
 // @include             *aliexpress.com/*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -523,18 +523,14 @@ function changeTextContent(ele, shippingPrice) {
         }
         var reg;
         var className = ele.className + "";
-        if (className == "price") {
+        if (className == "price" || className == "value" || className == "value notranslate")
+        {
             reg = new RegExp(/\$([\d\.\,]+ \- [\d\.\,]+|[\d\.\,]+)/g);
         }
         else if (className == "p-price")
         {
             //alert(textContent);
             reg = new RegExp(/([\d\.\,]+ \- [\d\.\,]+|[\d\.\,]+)/g);
-        }
-        else if (className == "value")
-        {
-            //alert(textContent);
-            reg = new RegExp(/\$([\d\.\,]+ \- [\d\.\,]+|[\d\.\,]+)/g);
         }
         else {
             reg = new RegExp(/US \$[\s\S].*?[\d\.\,]+/g);
@@ -624,6 +620,7 @@ function checkTHB()
         converterAllToThb('//*[@class="price"]');
         converterAllToThb('//*[@class="value"]');
         converterAllToThb('//*[@class="notranslate"]');
+        converterAllToThb('//*[@class="value notranslate"]');
         // Contains Source Symbol notranslate
         converterAllToThb('//*[contains(text(),"' + sourceSymbol + '")]');
         hideEle('//*[@itemprop="priceCurrency"]');

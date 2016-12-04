@@ -6,7 +6,7 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version             1.9
+// @version             2.0
 // @license             Apache
 // @include             *aliexpress.com/*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -42,7 +42,12 @@ const showShippingBy = true;  //แสดงชื่อบริษัทขน
 const includeProcessingTime = true; //รวมเวลาบรรจุสินค้าก่อนส่ง
 const showPiecesPerLot = true; // 
 
+var ShippingFreeTrackedWork = "#008000";
+var ShippingFreeTrackedNotWork = "#556B2F";//"#32CD32";
+var ShippingChargeTrackedWork = "#FF0000";
 
+
+const debug = true; //
 var runOneShipping = true;
 var htmlXRates = "";
 var baht = 0;
@@ -99,7 +104,7 @@ function formatMoney(num, decPlaces) {
             }, "");
         }
     } catch (err) {
-        alert("Error at formatMoney\n\n" + err.message);
+        if (debug) alert("Error at formatMoney\n\n" + err.message);
     }
     return 0;
 }
@@ -180,7 +185,7 @@ function usdToTHB(usds, shippingPrice) {
             }
         }
     } catch (err) {
-        alert("Error at usdToTHB\n\n" + err.message);
+        if (debug) alert("Error at usdToTHB\n\n" + err.message);
     }
     //alert(bahtStr);
     return bahtStr; 
@@ -252,7 +257,7 @@ function findAncestor(el, maxLayer) {
         }
     } catch (err)
     {
-        alert("Error at findAncestor\n\n" + err.message);
+        if (debug) alert("Error at findAncestor\n\n" + err.message);
     }
     
     return el;
@@ -269,9 +274,7 @@ function urlCheck() {
 function converterAllToThb(xPath) {
     try {
         var eles = evaluateXPath(document, xPath);
-        var ShippingFreeTrackedWork = "#008000";
-        var ShippingFreeTrackedNotWork = "#556B2F";//"#32CD32";
-        var ShippingChargeTrackedWork = "#FF0000";
+        
         //alert(eles.length);
         var href = window.location.href;
         for (var i = 0; i < eles.length; i++) {
@@ -498,7 +501,7 @@ function converterAllToThb(xPath) {
             //break;
         }
     } catch (err) {
-        alert("Error at converterAllToThb\n\n" + err.message);
+        if (debug) alert("Error at converterAllToThb\n\n" + err.message);
     }
     
 }
@@ -533,7 +536,7 @@ function changeTextContent(ele, shippingPrice) {
             reg = new RegExp(/([\d\.\,]+ \- [\d\.\,]+|[\d\.\,]+)/g);
         }
         else {
-            reg = new RegExp(/US \$[\s\S].*?[\d\.\,]+/g);
+            reg = new RegExp(/[\s\S].*?[\d\.\,]+/g);
         }
         var results;
         while ((results = reg.exec(textContent)) != null)
@@ -563,7 +566,7 @@ function changeTextContent(ele, shippingPrice) {
         //alert(textContent);
         ele.textContent = textContent;
     } catch (err) {
-        alert("Error at changeTextContent\n\n" + err.message);
+        if (debug) alert("Error at changeTextContent\n\n" + err.message);
     }
     
 }
@@ -602,7 +605,7 @@ function getShippingPrice(ele) {
             }
         }
     } catch (err) {
-        alert("Error at getShippingPrice\n\n" + err.message);
+        if (debug) alert("Error at getShippingPrice\n\n" + err.message);
     }
 	
 	return 0;
@@ -654,9 +657,8 @@ function checkTHB()
         }
     }
     catch (err) {
-        alert("Error at checkTHB\n\n" + err.message);
+        if (debug) alert("Error at checkTHB\n\n" + err.message);
     }
-	
 }
 var observer = new MutationObserver(function (mutations) {
    
@@ -674,21 +676,10 @@ var observer = new MutationObserver(function (mutations) {
             //Logistics Cost
             converterAllToThb('//*[@class="logistics-cost"]');
         } catch (err) {
-            alert("Error at MutationObserver\n\n" + err.message);
+            if (debug) alert("Error at MutationObserver\n\n" + err.message);
         }
     });    
 });
-//function pageFullyLoaded() {
-//}
-//function DOM_ContentReady () {
-//    //alert("DOM_ContentReady");
-//}
-//document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
-//window.addEventListener ("load", pageFullyLoaded);
-
-RegExp.quote = function (str) {
-    return str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
-};
 
 window.onload = function () {
     try {
@@ -751,7 +742,7 @@ window.onload = function () {
         //    }
         //}
     } catch (err) {
-        alert("Error at window.onload\n\n" + err.message);
+        if (debug) alert("Error at window.onload\n\n" + err.message);
     }
     
 }

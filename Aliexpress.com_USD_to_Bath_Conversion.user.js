@@ -6,7 +6,7 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version             2.0
+// @version             2.1
 // @license             Apache
 // @include             *aliexpress.com/*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -35,7 +35,7 @@ const sourceSymbol = "$"; //สัญญาลักษ์สกุลเงิ�
 const prefixTagetSymbol = "฿"; //สัญญาลักษ์สกุลเงินที่จะแปลงไป
 const suffixTagetSymbol = "บาท"; //สัญญาลักษ์สกุลเงินที่จะแปลงไป
 const useSuffixTagetSymbol = true;
-const showSourcePrice = false;
+const showSourcePrice = true;
 const includeShippingPrice = true;
 const hideShippingCost = true; // ถ้าคุณเลือก "includeShippingPrice = true" คุณสามรถกำหนดให้ไม่ต้องแสดงค่าจัดส่งได้ ปรกติค่าคือ true.
 const showShippingBy = true;  //แสดงชื่อบริษัทขนส่ง
@@ -47,7 +47,7 @@ var ShippingFreeTrackedNotWork = "#556B2F";//"#32CD32";
 var ShippingChargeTrackedWork = "#FF0000";
 
 
-const debug = true; //
+const debug = false; //
 var runOneShipping = true;
 var htmlXRates = "";
 var baht = 0;
@@ -111,9 +111,10 @@ function formatMoney(num, decPlaces) {
 function usdToTHB(usds, shippingPrice) {
     var bahtStr = '';
     var val1, val2, val1Thb, val2Thb;
-    try {
+    try
+    {
+        //alert(baht);
         //alert("usdToTHB/ usds=" + usds + ":" + shippingPrice);
-
         //alert(shippingPrice);
         //shippingPrice = parseToFloat(shippingPrice) * baht;
         //alert(shippingPrice);
@@ -450,7 +451,7 @@ function converterAllToThb(xPath) {
                                     var processingTime = (processingTimes[j] + "").replace(/[^\d]/ig, "");
                                     var price = (prices[j] + "").replace(/[^\d\.\,]/ig, "");
                                     var isTracked = (isTrackeds[j] + "").replace(/(isTracked|"|:|,)/ig, "");
-
+                                    //alert(price);
                                     //+ Show Shipping By
                                     if (showShippingBy) {
                                         //+ Include Processing Time
@@ -526,7 +527,7 @@ function changeTextContent(ele, shippingPrice) {
         }
         var reg;
         var className = ele.className + "";
-        if (className == "price" || className == "value" || className == "value notranslate")
+        if (className == "price" || className == "value" || className == "value notranslate" || className == "p4p-price-list" || className == "p-unit-lot-disc")
         {
             reg = new RegExp(/\$([\d\.\,]+ \- [\d\.\,]+|[\d\.\,]+)/g);
         }
@@ -593,9 +594,15 @@ function getShippingPrice(ele) {
                     shippingPriceReport = parseToFloat(shippingPrice.textContent.replace(/[^\d\.\,]/ig, ""));
                     if (hideShippingCost) {
                         //shippingPrice[0].style.display = 'none';
-                        shippingPrice.getElementsByClassName("value")[0].style.display = 'none';
-                        shippingPrice.getElementsByClassName("separator")[0].style.display = 'none';
-                        shippingPrice.getElementsByClassName("unit")[0].style.display = 'none';
+                        var value = shippingPrice.getElementsByClassName("value");
+                        if (value.length > 0) value[0].style.display = 'none';
+
+                        var separator = shippingPrice.getElementsByClassName("separator");
+                        if (separator.length > 0) separator[0].style.display = 'none';
+
+                        var unit = shippingPrice.getElementsByClassName("unit");
+                        if (unit.length > 0) unit[0].style.display = 'none';
+                        
                         shippingPrice.style.fontWeight = "900";
                     }
                     return shippingPriceReport;
@@ -655,6 +662,16 @@ function checkTHB()
                 }
             }
         }
+        const showSaler = true;
+        if (showSaler) {
+            var storeDsrDatas = document.getElementsByClassName("store-dsr-data");
+            //alert(storeDsrDatas.length);
+            if (storeDsrDatas.length > 0)
+            {
+                //alert(storeDsrDatas[0].innerHTML);
+                //document.getElementsByClassName("product-attribute-main")[0].appendChild(storeDsrDatas[0]);
+            }
+        }
     }
     catch (err) {
         if (debug) alert("Error at checkTHB\n\n" + err.message);
@@ -668,13 +685,15 @@ var observer = new MutationObserver(function (mutations) {
             // Total-price-show
             converterAllToThb('//*[@class="total-price-show"]');
             // Price Currency
-            hideEle('//*[@itemprop="priceCurrency"]');
             converterAllToThb('//*[@class="p-price"]');
             converterAllToThb('//*[@class="price"]');
-            //converterAllToThb('//*[@class="value"]');
-            //converterAllToThb('//*[@class="notranslate"]');
+            converterAllToThb('//*[@class="value"]');
+            converterAllToThb('//*[@class="notranslate"]');
             //Logistics Cost
             converterAllToThb('//*[@class="logistics-cost"]');
+
+            converterAllToThb('//*[contains(text(),"' + sourceSymbol + '")]');
+            hideEle('//*[@itemprop="priceCurrency"]');
         } catch (err) {
             if (debug) alert("Error at MutationObserver\n\n" + err.message);
         }
@@ -682,9 +701,12 @@ var observer = new MutationObserver(function (mutations) {
 });
 
 window.onload = function () {
-    try {
+    try
+    {
+        var href = window.location.href;
         resourceText('http://www.x-rates.com/calculator/?from=' + source + '&to=' + taget + '&amount=1', "", "", function (htmlXRates, eleOut) {
-            if (baht == 0) {
+            if (baht == 0 || baht == undefined || baht == null)
+            {
                 var result = htmlXRates.match(/ccOutputRslt">[\d\.\,]+/ig) + "";
                 var ccOutputRslt = result.replace(/[^\d\.\,]/ig, "");
                 result = htmlXRates.match(/ccOutputTrail">[\d\.\,]+/ig) + "";
@@ -702,12 +724,38 @@ window.onload = function () {
                     //attributeFilter : ['style']
                 };
                 observer.observe(target, config);
-            } else {
-                //alert("Error getElementById")
             }
+            //
+            //if (href.includes("/item/"))
+            //{
+            //    var target2 = document.getElementsByClassName('ui-window ui-window-normal ui-window-transition');
+            //    if (target2.length > 0)
+            //    {
+            //        var config = {
+            //            attributes: true,
+            //            childList: true,
+            //            characterData: true,
+            //            subtree: true
+            //            //attributeFilter : ['style']
+            //        };
+            //        observer.observe(target2[0], config);
+            //    }
+            //    var target3 = document.getElementsByClassName('ui-window ui-window-normal ui-window-transition ui-add-shopcart-dialog');
+            //    if (target3.length > 0)
+            //    {
+            //        var config = {
+            //            attributes: true,
+            //            childList: true,
+            //            characterData: true,
+            //            subtree: true
+            //            //attributeFilter : ['style']
+            //        };
+            //        observer.observe(target3[0], config);
+            //    }
+            //}
+
             // On scroll
             window.onscroll = function () {
-                var href = window.location.href;
                 if (href.includes("sale.aliexpress.com")) {
                     converterAllToThb('//div[@class="price"]');
                 }
@@ -744,7 +792,6 @@ window.onload = function () {
     } catch (err) {
         if (debug) alert("Error at window.onload\n\n" + err.message);
     }
-    
 }
 //https://my.aliexpress.com/wishlist/wish_list_product_list.htm?&currentGroupId=3108749798&page=1
 function excludeUrl(href){	

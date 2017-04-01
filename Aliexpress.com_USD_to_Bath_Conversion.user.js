@@ -6,7 +6,7 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version             2.1
+// @version             2.2
 // @license             Apache
 // @include             *aliexpress.com/*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -40,7 +40,7 @@ const includeShippingPrice = true;
 const hideShippingCost = true; // ถ้าคุณเลือก "includeShippingPrice = true" คุณสามรถกำหนดให้ไม่ต้องแสดงค่าจัดส่งได้ ปรกติค่าคือ true.
 const showShippingBy = true;  //แสดงชื่อบริษัทขนส่ง
 const includeProcessingTime = true; //รวมเวลาบรรจุสินค้าก่อนส่ง
-const showPiecesPerLot = true; // 
+const showPiecesPerLot = true; // แสดงจำนวนต่อ Lot
 
 var ShippingFreeTrackedWork = "#008000";
 var ShippingFreeTrackedNotWork = "#556B2F";//"#32CD32";
@@ -52,37 +52,37 @@ var runOneShipping = true;
 var htmlXRates = "";
 var baht = 0;
 function resourceText(url, ele, ele2, callback, postfields) {
-	var options = {
-		'url' : url,
-		'method' : (!postfields ? 'get' : 'post'),
-		'headers' : {
-			'User-Agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1) Gecko/20080404'
-		},
-		'onload' : function (e) {
-		    callback(e.responseText, ele, ele2);
-		},
-		'onerror' : function (e) {
-		    callback(e.responseText, ele, ele2);
-		}
-	};
+    var options = {
+        'url' : url,
+        'method' : (!postfields ? 'get' : 'post'),
+        'headers' : {
+            'User-Agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1) Gecko/20080404'
+        },
+        'onload' : function (e) {
+            callback(e.responseText, ele, ele2);
+        },
+        'onerror' : function (e) {
+            callback(e.responseText, ele, ele2);
+        }
+    };
 
-	if (!!postfields) {
-		var postdata = '';
-		for (n in postfields) {
-			postdata += '&' + n + '=' + encodeURIComponent(postfields[n]);
-		}
-		data = postdata.substr(1);
+    if (!!postfields) {
+        var postdata = '';
+        for (var n in postfields) {
+            postdata += '&' + n + '=' + encodeURIComponent(postfields[n]);
+        }
+        data = postdata.substr(1);
 
-		options.headers["Content-type"] = "application/x-www-form-urlencoded";
-		options.headers["Content-length"] = postdata.length;
-		options.data = postdata;
-	}
+        options.headers["Content-type"] = "application/x-www-form-urlencoded";
+        options.headers["Content-length"] = postdata.length;
+        options.data = postdata;
+    }
 
-	GM_xmlhttpRequest(options);
+    GM_xmlhttpRequest(options);
 }
 function isNumeric(n) {
     //alert(n);
-  return !isNaN(parseFloat(n)) && isFinite(n);
+    return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 function parseToFloat(n) {
@@ -90,24 +90,18 @@ function parseToFloat(n) {
     n = n.replace(/[^\d\.]+/g,"");
     return parseFloat(n);
 }
-function formatMoney(num, decPlaces) {
-    try {
-        if (decPlaces > 0) {
-            var p = num.toFixed(decPlaces).split(".");
-            return p[0].split("").reverse().reduce(function (acc, num, i, orig) {
-                return num + (i && !(i % 3) ? "," : "") + acc;
-            }, "") + "." + p[1];
-        } else {
-            var p = num.toFixed(decPlaces).split(".");
-            return p[0].split("").reverse().reduce(function (acc, num, i, orig) {
-                return num + (i && !(i % 3) ? "," : "") + acc;
-            }, "");
-        }
-    } catch (err) {
-        if (debug) alert("Error at formatMoney\n\n" + err.message);
-    }
-    return 0;
-}
+
+Number.prototype.formatMoney = function(c, d, t){
+    var n = this;
+    c = isNaN(c = Math.abs(c)) ? 2 : c;
+    d = d === undefined ? "." : d;
+    t = t === undefined ? "," : t;
+    s = n < 0 ? "-" : "";
+    i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c)));
+    var j = (j = i.length) > 3 ? j % 3 : 0;
+    return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+};
+
 function usdToTHB(usds, shippingPrice) {
     var bahtStr = '';
     var val1, val2, val1Thb, val2Thb;
@@ -125,15 +119,15 @@ function usdToTHB(usds, shippingPrice) {
 
             if (useSuffixTagetSymbol) {
                 if (showSourcePrice) {
-                    bahtStr = formatMoney(parseToFloat(val1 * baht), 2) + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + formatMoney(val1, 2) + ')';
+                    bahtStr = (parseToFloat(val1 * baht)).formatMoney() + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + val1.formatMoney() + ')';
                 } else {
-                    bahtStr = formatMoney(parseToFloat(val1 * baht), 2) + ' ' + suffixTagetSymbol;
+                    bahtStr = (parseToFloat(val1 * baht)).formatMoney() + ' ' + suffixTagetSymbol;
                 }
             } else {
                 if (showSourcePrice) {
-                    bahtStr = prefixTagetSymbol + formatMoney(parseToFloat(val1 * baht), 2) + ' (' + sourceSymbol + formatMoney(val1, 2) + ')';
+                    bahtStr = prefixTagetSymbol + (parseToFloat(val1 * baht)).formatMoney() + ' (' + sourceSymbol + val1.formatMoney() + ')';
                 } else {
-                    bahtStr = prefixTagetSymbol + formatMoney(parseToFloat(val1 * baht), 2);
+                    bahtStr = prefixTagetSymbol + (parseToFloat(val1 * baht).formatMoney());
                 }
             }
             //alert(bahtStr);
@@ -143,20 +137,20 @@ function usdToTHB(usds, shippingPrice) {
             if (usds.length == 2) {
                 val1 = usds[0].replace(/[^\d\.\,]/ig, "");
                 val1 = parseToFloat(val1) + shippingPrice;
-                val1Thb = formatMoney((val1 * baht), 2);
+                val1Thb = (val1 * baht).formatMoney();
 
                 val2 = usds[1].replace(/[^\d\.\,]/ig, "");
                 val2 = parseToFloat(val2) + shippingPrice;
-                val2Thb = formatMoney((val2 * baht), 2);
+                val2Thb = (val2 * baht).formatMoney();
                 if (useSuffixTagetSymbol) {
                     if (showSourcePrice) {
-                        bahtStr = val1Thb + ' - ' + val2Thb + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + formatMoney(val1, 2) + ' - ' + formatMoney(val2, 2) + ')';
+                        bahtStr = val1Thb + ' - ' + val2Thb + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + val1.formatMoney() + ' - ' + val2.formatMoney() + ')';
                     } else {
                         bahtStr = val1Thb + ' - ' + val2Thb + ' ' + suffixTagetSymbol;
                     }
                 } else {
                     if (showSourcePrice) {
-                        bahtStr = prefixTagetSymbol + val1Thb + ' - ' + val2Thb + ' (' + sourceSymbol + formatMoney(val1, 2) + ' - ' + formatMoney(val2, 2) + ')';
+                        bahtStr = prefixTagetSymbol + val1Thb + ' - ' + val2Thb + ' (' + sourceSymbol + val1.formatMoney() + ' - ' + val2.formatMoney() + ')';
                     } else {
                         bahtStr = prefixTagetSymbol + val1Thb + ' - ' + val2Thb;
                     }
@@ -165,18 +159,18 @@ function usdToTHB(usds, shippingPrice) {
             }
             else if (usds.length == 1) {
                 val1 = usds[0].replace(/[^\d\.\,]/ig, "");
-                if (val1 == "") return "";
+                if (val1 === "") return "";
                 val1 = parseToFloat(val1) + shippingPrice;
-                val1Thb = formatMoney((val1 * baht), 0);
+                val1Thb = (val1 * baht).formatMoney(0);
                 if (useSuffixTagetSymbol) {
                     if (showSourcePrice) {
-                        bahtStr = val1Thb + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + formatMoney(val1, 2) + ')';
+                        bahtStr = val1Thb + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + val1.formatMoney() + ')';
                     } else {
                         bahtStr = val1Thb + ' ' + suffixTagetSymbol;
                     }
                 } else {
                     if (showSourcePrice) {
-                        bahtStr = prefixTagetSymbol + val1Thb + ' (' + sourceSymbol + formatMoney(val1, 2) + ')';
+                        bahtStr = prefixTagetSymbol + val1Thb + ' (' + sourceSymbol + val1.formatMoney() + ')';
                     } else {
                         bahtStr = prefixTagetSymbol + val1Thb;
                     }
@@ -189,14 +183,14 @@ function usdToTHB(usds, shippingPrice) {
         if (debug) alert("Error at usdToTHB\n\n" + err.message);
     }
     //alert(bahtStr);
-    return bahtStr; 
-};
+    return bahtStr;
+}
 function getElementByAttribute(attr, value, root) {
     root = root || document.body;
     if(root.hasAttribute(attr) && root.getAttribute(attr) == value) {
         return root;
     }
-    var children = root.children, 
+    var children = root.children,
         element;
     for(var i = children.length; i--; ) {
         element = getElementByAttribute(attr, value, children[i]);
@@ -206,23 +200,25 @@ function getElementByAttribute(attr, value, root) {
     }
     return null;
 }
-function evaluateXPath(document, expression) {
-    var ANY_TYPE = XPathResult.ANY_TYPE;
-    var nodes = document.evaluate(expression, document, null, ANY_TYPE, null);
-    var results = [], node;
-    while(node = nodes.iterateNext()) {
-        results.push(node);
-    }
-    return results;
+function evaluateXPath(parent, xpath)
+{
+  let results = [];
+  let query = document.evaluate(xpath,
+      parent || document,
+      null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+  for (let i=0, length=query.snapshotLength; i<length; ++i) {
+    results.push(query.snapshotItem(i));
+  }
+  return results;
 }
 function hideEle(xPath){
-	var eles = evaluateXPath(document, xPath);
-	if(eles.length > 0)eles[0].style.display = 'none';
+    var eles = evaluateXPath(document, xPath);
+    if(eles.length > 0)eles[0].style.display = 'none';
 }
 
 function findParentNode(className, childObj) {
     var testObj = childObj.parentNode;
-    while ((testObj.className + "") != className && testObj != null)
+    while ((testObj.className + "") != className && testObj !== null)
     {
         testObj = testObj.parentNode;
     }
@@ -235,19 +231,19 @@ function findAncestor(el, maxLayer) {
         for (i = 0; i < maxLayer; i++)
         {
             el = el.parentNode;
-            if (el == null)
+            if (el === null)
             {
                 return elBak;
             }
             var className = (el.className + "").trim();
             //alert(className);
-            if (className == "item"
-                || className == "list-item list-item-first"
-                || className == "list-item"
-                || className == "right-block util-clearfix"
-                || className == "p-logistics-addition-info"
-                || className == "product util-clearfix js-product  item-group"
-                )
+            if (className == "item" ||
+                className == "list-item list-item-first" ||
+                className == "list-item" ||
+                className == "right-block util-clearfix" ||
+                className == "p-logistics-addition-info" ||
+                className == "product util-clearfix js-product  item-group"
+               )
             {
                 break;
             }
@@ -260,22 +256,24 @@ function findAncestor(el, maxLayer) {
     {
         if (debug) alert("Error at findAncestor\n\n" + err.message);
     }
-    
+
     return el;
 }
 
 function urlCheck() {
     var href = window.location.href;
     return (href.includes("wholesale") ||
-        href.includes("SearchText") ||
-        href.includes("wishlist") ||
-        href.includes("category"));
+            href.includes("SearchText") ||
+            href.includes("wishlist") ||
+            href.includes("category"));
 }
 
 function converterAllToThb(xPath) {
     try {
+        var productId = "";
+        var shippingPrice = null;
+
         var eles = evaluateXPath(document, xPath);
-        
         //alert(eles.length);
         var href = window.location.href;
         for (var i = 0; i < eles.length; i++) {
@@ -290,117 +288,118 @@ function converterAllToThb(xPath) {
                 {
                     //alert(href);
                     var eleParentNode = findAncestor(ele, 5);
-                    if (eleParentNode == null) {
+                    if (eleParentNode === null) {
                         //alert("erro null");
                         changeTextContent(ele, getShippingPrice(ele));
                         continue;
                     }
 
                     var products = eleParentNode.getElementsByClassName("history-item product ");
-                    //alert(products.length); 
+                    //alert(products.length);
                     //break;
-                    if (products.length == 0) {
+                    if (products.length === 0) {
                         products = eleParentNode.getElementsByClassName("product");
                     }
-                    if (products.length == 0) {
+                    if (products.length === 0) {
                         products = eleParentNode.getElementsByClassName("history-item product j-p4plog");
                     }
-                    if (products.length == 0) {
+                    if (products.length === 0) {
                         products = eleParentNode.getElementsByClassName("image");
                     }
                     //alert(products.length);
                     //break;
+
                     if (products.length > 0) {
                         var productUrl = products[0].href + "";
                         //alert(productUrl);break;
-                        var productId = ((productUrl.match(/\/\d+.*?\.htm/) + "").replace(/.*\//, "") + "").replace(/.htm/, "") + "";
+                        productId = ((productUrl.match(/\/\d+.*?\.htm/) + "").replace(/.*\//, "") + "").replace(/.htm/, "") + "";
                         //alert(productId);break;
                         resourceText("https://freight.aliexpress.com/ajaxFreightCalculateService.htm?f=d&productid=" + productId +
-                            "&count=1&currencyCode=USD&sendGoodsCountry=CN&country=TH&province=&city=&abVersion=1", ele, eleParentNode, function (htmlXRates, eleOut, eleOut2) {
-                                //alert(htmlXRates);
-                                var companyDisplayName = (htmlXRates.match(/"companyDisplayName":".*?"/) + "")
-                                    .replace(/(companyDisplayName|"|:|,)/ig, "");
-                                var time = (htmlXRates.match(/"time":".*?"/) + "").replace(/[^\d\-]/ig, "");
-                                var processingTime = (htmlXRates.match(/"processingTime":.*?,/) + "").replace(/[^\d]/ig, "");
-                                var price = (htmlXRates.match(/"price":"[\d\.\,]+"/) + "").replace(/[^\d\.]/ig, "");
-                                var localPriceFormatStr = (htmlXRates.match(/"localPriceFormatStr":".*?"/) + "").replace(/(localPriceFormatStr|"|:|,)/ig, "");
-                                var isTracked = (htmlXRates.match(/"isTracked":.*?,/g)[0] + "").replace(/(isTracked|"|:|,)/ig, "");
-                                //alert(price);
-                                //return;
-                                if (price != "0") {
-                                    changeTextContent(eleOut, parseToFloat(price));
+                                     "&count=1&currencyCode=USD&sendGoodsCountry=CN&country=TH&province=&city=&abVersion=1", ele, eleParentNode, function (htmlXRates, eleOut, eleOut2) {
+                            //alert(htmlXRates);
+                            var companyDisplayName = (htmlXRates.match(/"companyDisplayName":".*?"/) + "")
+                            .replace(/(companyDisplayName|"|:|,)/ig, "");
+                            var time = (htmlXRates.match(/"time":".*?"/) + "").replace(/[^\d\-]/ig, "");
+                            var processingTime = (htmlXRates.match(/"processingTime":.*?,/) + "").replace(/[^\d]/ig, "");
+                            var price = (htmlXRates.match(/"price":"[\d\.\,]+"/) + "").replace(/[^\d\.]/ig, "");
+                            var localPriceFormatStr = (htmlXRates.match(/"localPriceFormatStr":".*?"/) + "").replace(/(localPriceFormatStr|"|:|,)/ig, "");
+                            var isTracked = (htmlXRates.match(/"isTracked":.*?,/g)[0] + "").replace(/(isTracked|"|:|,)/ig, "");
+                            //alert(price);
+                            //return;
+                            if (price != "0") {
+                                changeTextContent(eleOut, parseToFloat(price));
+                            } else {
+                                changeTextContent(eleOut, 0);
+                            }
+
+                            //+ Show Shipping By
+                            if (showShippingBy) {
+                                //+ Include Processing Time
+                                if (includeProcessingTime) {
+                                    var times = time.split("-");
+                                    var timeStart = parseInt(times[0]) + parseInt(processingTime);
+                                    var timeEnd = parseInt(times[1]) + parseInt(processingTime);
+                                    time = timeStart + "-" + timeEnd + " วัน";
+                                }
+                                var report = "";
+                                if (price == "0") {
+                                    if (isTracked == "true") {
+                                        report += "<strong style='color:" + ShippingFreeTrackedWork + "'>";
+                                    } else {
+                                        report += "<strong style='color:" + ShippingFreeTrackedNotWork + "'>";
+                                    }
                                 } else {
-                                    changeTextContent(eleOut, 0);
+                                    report += "<strong style='color:" + ShippingChargeTrackedWork + "'>";
                                 }
 
-                                //+ Show Shipping By
-                                if (showShippingBy) {
-                                    //+ Include Processing Time
-                                    if (includeProcessingTime) {
-                                        var times = time.split("-");
-                                        var timeStart = parseInt(times[0]) + parseInt(processingTime);
-                                        var timeEnd = parseInt(times[1]) + parseInt(processingTime);
-                                        time = timeStart + "-" + timeEnd + " วัน";
-                                    }
-                                    var report = "";
-                                    if (price == "0") {
-                                        if (isTracked == "true") {
-                                            report += "<strong style='color:" + ShippingFreeTrackedWork + "'>";
-                                        } else {
-                                            report += "<strong style='color:" + ShippingFreeTrackedNotWork + "'>";
-                                        }
-                                    } else {
-                                        report += "<strong style='color:" + ShippingChargeTrackedWork + "'>";
-                                    }
+                                var shipping = "";
+                                if (price == "0") {
+                                    shipping = "จัดส่งฟรี: ";
+                                    price = "";
+                                } else {
+                                    shipping = "รวมค่าจัดส่ง: ";
+                                }
 
-                                    var shipping = "";
-                                    if (price == "0") {
-                                        shipping = "จัดส่งฟรี: ";
-                                        price = "";
-                                    } else {
-                                        shipping = "รวมค่าจัดส่ง: ";
-                                    }
+                                //alert(companyDisplayName);
+                                //alert(price);
+                                //alert(time);
+                                //alert(processingTime);
+                                //var div = document.createElement('div');
+                                //div.innerHTML = "<strong>" + shipping + " " + companyDisplayName + " " + time + "</strong>";
+                                //alert(eleOut2.innerHTML);
+                                //alert(isTracked);
 
-                                    //alert(companyDisplayName);
-                                    //alert(price);
-                                    //alert(time);
-                                    //alert(processingTime);
-                                    //var div = document.createElement('div');
-                                    //div.innerHTML = "<strong>" + shipping + " " + companyDisplayName + " " + time + "</strong>";
-                                    //alert(eleOut2.innerHTML);
-                                    //alert(isTracked);
-
-                                    var shippingPrices = eleOut2.getElementsByClassName("free-s");
-                                    if (shippingPrices.length > 0) {
-                                        var shippingPrice = shippingPrices[0];
-                                        report += shipping;
-                                        report += " ";
-                                        report += companyDisplayName;
-                                        report += " ";
-                                        report += time;
-                                        report += "</strong>";
-                                        shippingPrice.innerHTML = report;
-                                    }
-                                    shippingPrices = eleOut2.getElementsByClassName("pnl-shipping");
+                                shippingPrices = eleOut2.getElementsByClassName("free-s");
+                                if (shippingPrices.length > 0) {
+                                    shippingPrice = shippingPrices[0];
+                                    report += shipping;
+                                    report += " ";
+                                    report += companyDisplayName;
+                                    report += " ";
+                                    report += time;
+                                    report += "</strong>";
+                                    shippingPrice.innerHTML = report;
+                                }
+                                shippingPrices = eleOut2.getElementsByClassName("pnl-shipping");
+                                //alert(shippingPrices.length);
+                                if (shippingPrices.length > 0) {
                                     //alert(shippingPrices.length);
-                                    if (shippingPrices.length > 0) {
-                                        //alert(shippingPrices.length);
-                                        var shippingPrice = shippingPrices[0];
-                                        report += shipping;
-                                        report += " ";
-                                        report += companyDisplayName;
-                                        report += " ";
-                                        report += time;
-                                        report += "</strong>";
-                                        shippingPrice.innerHTML = report;
+                                    shippingPrice = shippingPrices[0];
+                                    report += shipping;
+                                    report += " ";
+                                    report += companyDisplayName;
+                                    report += " ";
+                                    report += time;
+                                    report += "</strong>";
+                                    shippingPrice.innerHTML = report;
 
-                                    }
                                 }
-                            });
+                            }
+                        });
                         //break;
                         //+ Hide Shipping Cost
                         if (hideShippingCost && !showShippingBy) {
-                            var shippingPrice = eleParentNode.getElementsByClassName("pnl-shipping");
+                            shippingPrice = eleParentNode.getElementsByClassName("pnl-shipping");
                             if (shippingPrice.length > 0) {
                                 //shippingPrice[0].style.display = 'none';
                                 shippingPrice[0].getElementsByClassName("value")[0].style.display = 'none';
@@ -425,73 +424,73 @@ function converterAllToThb(xPath) {
                         if (logistics.textContent.includes("วัน")) {
                             continue;
                         }
-                        var productId = ((href.match(/\/\d+.*?\.htm/) + "").replace(/.*\//, "") + "").replace(/.htm/, "") + "";
+                        productId = ((href.match(/\/\d+.*?\.htm/) + "").replace(/.*\//, "") + "").replace(/.htm/, "") + "";
                         //alert(productId);
 
                         //  https://freight.aliexpress.com/ajaxFreightCalculateService.htm?f=d&productid=32751886157&count=1&currencyCode=USD&sendGoodsCountry=CN&country=TH&province=&city=&abVersion=1
                         resourceText("https://freight.aliexpress.com/ajaxFreightCalculateService.htm?f=d&productid=" +
-                            productId +
-                            "&count=1&currencyCode=USD&sendGoodsCountry=CN&country=TH&province=&city=&abVersion=1",
-                            logistics,
-                            null,
-                            function (htmlXRates, eleOut, eleOut2) {
+                                     productId +
+                                     "&count=1&currencyCode=USD&sendGoodsCountry=CN&country=TH&province=&city=&abVersion=1",
+                                     logistics,
+                                     null,
+                                     function (htmlXRates, eleOut, eleOut2) {
 
-                                //alert(htmlXRates);
-                                var companyDisplayNames = htmlXRates.match(/"companyDisplayName":".*?"/g);
-                                var times = htmlXRates.match(/"time":".*?"/g);
-                                var processingTimes = htmlXRates.match(/"processingTime":.*?,/g);
-                                var prices = htmlXRates.match(/"price":"[\d\.\,]+"/g);
-                                var isTrackeds = htmlXRates.match(/"isTracked":.*?,/g);
-                                //alert(times);
-                                var report = "";
-                                for (var j = 0; j < companyDisplayNames.length; j++) {
-                                    //alert(times[j]);
-                                    var companyDisplayName = (companyDisplayNames[j] + "").replace(/(companyDisplayName|"|:|,)/ig, "");
-                                    var time = (times[j] + "").replace(/[^\d\-]/ig, "");
-                                    var processingTime = (processingTimes[j] + "").replace(/[^\d]/ig, "");
-                                    var price = (prices[j] + "").replace(/[^\d\.\,]/ig, "");
-                                    var isTracked = (isTrackeds[j] + "").replace(/(isTracked|"|:|,)/ig, "");
-                                    //alert(price);
-                                    //+ Show Shipping By
-                                    if (showShippingBy) {
-                                        //+ Include Processing Time
-                                        if (includeProcessingTime) {
-                                            //alert(time);
-                                            var times2 = time.split("-");
-                                            var timeStart = parseInt(times2[0]) + parseInt(processingTime);
-                                            var timeEnd = parseInt(times2[1]) + parseInt(processingTime);
-                                            time = timeStart + "-" + timeEnd + " วัน";
-                                        }
-                                        if (price == "0") {
-                                            if (isTracked == "true") {
-                                                report += "<strong style='color:" + ShippingFreeTrackedWork + "'>";
-                                            } else {
-                                                report += "<strong style='color:" + ShippingFreeTrackedNotWork + "'>";
-                                            }
-                                        } else {
-                                            report += "<strong style='color:" + ShippingChargeTrackedWork + "'>";
-                                        }
-                                        var shipping = "";
-                                        if (price == "0") {
-                                            shipping = "จัดส่งฟรี: ";
-                                            price = "";
-                                        } else {
-                                            shipping = "รวมค่าจัดส่ง: ";
-                                            price = usdToTHB(price, 0);
-                                        }
-                                        report += shipping;
-                                        report += " ";
-                                        report += price;
-                                        report += " ";
-                                        report += companyDisplayName;
-                                        report += " ";
-                                        report += time;
-                                        report += "</strong><br />";
+                            //alert(htmlXRates);
+                            var companyDisplayNames = htmlXRates.match(/"companyDisplayName":".*?"/g);
+                            var times = htmlXRates.match(/"time":".*?"/g);
+                            var processingTimes = htmlXRates.match(/"processingTime":.*?,/g);
+                            var prices = htmlXRates.match(/"price":"[\d\.\,]+"/g);
+                            var isTrackeds = htmlXRates.match(/"isTracked":.*?,/g);
+                            //alert(times);
+                            var report = "";
+                            for (var j = 0; j < companyDisplayNames.length; j++) {
+                                //alert(times[j]);
+                                var companyDisplayName = (companyDisplayNames[j] + "").replace(/(companyDisplayName|"|:|,)/ig, "");
+                                var time = (times[j] + "").replace(/[^\d\-]/ig, "");
+                                var processingTime = (processingTimes[j] + "").replace(/[^\d]/ig, "");
+                                var price = (prices[j] + "").replace(/[^\d\.\,]/ig, "");
+                                var isTracked = (isTrackeds[j] + "").replace(/(isTracked|"|:|,)/ig, "");
+                                //alert(price);
+                                //+ Show Shipping By
+                                if (showShippingBy) {
+                                    //+ Include Processing Time
+                                    if (includeProcessingTime) {
+                                        //alert(time);
+                                        var times2 = time.split("-");
+                                        var timeStart = parseInt(times2[0]) + parseInt(processingTime);
+                                        var timeEnd = parseInt(times2[1]) + parseInt(processingTime);
+                                        time = timeStart + "-" + timeEnd + " วัน";
                                     }
+                                    if (price == "0") {
+                                        if (isTracked == "true") {
+                                            report += "<strong style='color:" + ShippingFreeTrackedWork + "'>";
+                                        } else {
+                                            report += "<strong style='color:" + ShippingFreeTrackedNotWork + "'>";
+                                        }
+                                    } else {
+                                        report += "<strong style='color:" + ShippingChargeTrackedWork + "'>";
+                                    }
+                                    var shipping = "";
+                                    if (price == "0") {
+                                        shipping = "จัดส่งฟรี: ";
+                                        price = "";
+                                    } else {
+                                        shipping = "รวมค่าจัดส่ง: ";
+                                        price = usdToTHB(price, 0);
+                                    }
+                                    report += shipping;
+                                    report += " ";
+                                    report += price;
+                                    report += " ";
+                                    report += companyDisplayName;
+                                    report += " ";
+                                    report += time;
+                                    report += "</strong><br />";
                                 }
-                                eleOut.innerHTML = report;
                             }
-                        );
+                            eleOut.innerHTML = report;
+                        }
+                                    );
                     }
                 }
             }
@@ -504,14 +503,14 @@ function converterAllToThb(xPath) {
     } catch (err) {
         if (debug) alert("Error at converterAllToThb\n\n" + err.message);
     }
-    
+
 }
 
 function changeTextContent(ele, shippingPrice) {
     try
     {//
         var textContent = ele.innerText;
-        if (textContent == "")
+        if (textContent === "")
         {
             textContent = ele.textContent;
         }
@@ -521,7 +520,7 @@ function changeTextContent(ele, shippingPrice) {
         if (textContent.includes(prefixTagetSymbol) || textContent.includes(suffixTagetSymbol)) {
             return;
         }
-        if ((textContent.match(/\d+/g) + "") == "")
+        if ((textContent.match(/\d+/g) + "") === "")
         {
             return;
         }
@@ -540,7 +539,7 @@ function changeTextContent(ele, shippingPrice) {
             reg = new RegExp(/[\s\S].*?[\d\.\,]+/g);
         }
         var results;
-        while ((results = reg.exec(textContent)) != null)
+        while ((results = reg.exec(textContent)) !== null)
         {
             //alert(results.length + "\n\n" + results + "\n\n" + textContent);
             for (var i = 0; i < results.length; i++)
@@ -569,7 +568,6 @@ function changeTextContent(ele, shippingPrice) {
     } catch (err) {
         if (debug) alert("Error at changeTextContent\n\n" + err.message);
     }
-    
 }
 
 
@@ -581,7 +579,7 @@ function getShippingPrice(ele) {
         {
             var tmpEle = ele;
             for (var i = 0; i < 4; i++) {
-                if (tmpEle == null || tmpEle == undefined) return 0;
+                if (tmpEle === null || tmpEle === undefined) return 0;
                 var shippingPrice = tmpEle.getElementsByClassName("pnl-shipping");
                 if (shippingPrice.length > 0) {
 
@@ -602,7 +600,7 @@ function getShippingPrice(ele) {
 
                         var unit = shippingPrice.getElementsByClassName("unit");
                         if (unit.length > 0) unit[0].style.display = 'none';
-                        
+
                         shippingPrice.style.fontWeight = "900";
                     }
                     return shippingPriceReport;
@@ -614,18 +612,16 @@ function getShippingPrice(ele) {
     } catch (err) {
         if (debug) alert("Error at getShippingPrice\n\n" + err.message);
     }
-	
-	return 0;
+    return 0;
 }
 
 function checkTHB()
-{	
+{
     try {
         var href = window.location.href;
         if (!excludeUrl(href)) {
             return;
         }
-        
         converterAllToThb('//*[@class="p-price"]');
         converterAllToThb('//*[@class="price"]');
         converterAllToThb('//*[@class="value"]');
@@ -644,7 +640,7 @@ function checkTHB()
             for (var i = 0; i < piecesPerLots.length; i++) {
                 var piecesPerLot = piecesPerLots[i];
                 var eleParentNode = findAncestor(piecesPerLot, 5);
-                if (eleParentNode != null) {
+                if (eleParentNode !== null) {
                     //alert(piecesPerLot.textContent);
                     var pieces = eleParentNode.getElementsByClassName("price price-m");
                     //alert(pieces.textContent);
@@ -678,7 +674,7 @@ function checkTHB()
     }
 }
 var observer = new MutationObserver(function (mutations) {
-   
+
     mutations.forEach(function (mutationRecord) {
         try {
             //console.log(mutationRecord.type); // <- It always detects changes
@@ -697,15 +693,19 @@ var observer = new MutationObserver(function (mutations) {
         } catch (err) {
             if (debug) alert("Error at MutationObserver\n\n" + err.message);
         }
-    });    
+    });
 });
 
-window.onload = function () {
+if (window.attachEvent) {window.attachEvent('onload', windowOnload);}
+else if (window.addEventListener) {window.addEventListener('load', windowOnload, false);}
+else {document.addEventListener('load', windowOnload, false);}
+
+function windowOnload() {
     try
     {
         var href = window.location.href;
         resourceText('http://www.x-rates.com/calculator/?from=' + source + '&to=' + taget + '&amount=1', "", "", function (htmlXRates, eleOut) {
-            if (baht == 0 || baht == undefined || baht == null)
+            if (baht === 0 || baht === undefined || baht === null)
             {
                 var result = htmlXRates.match(/ccOutputRslt">[\d\.\,]+/ig) + "";
                 var ccOutputRslt = result.replace(/[^\d\.\,]/ig, "");
@@ -715,7 +715,7 @@ window.onload = function () {
             }
             checkTHB();
             var target = document.getElementById('j-total-price-value');
-            if (target != null) {
+            if (target !== null) {
                 var config = {
                     attributes: true,
                     childList: true,
@@ -794,25 +794,25 @@ window.onload = function () {
     }
 }
 //https://my.aliexpress.com/wishlist/wish_list_product_list.htm?&currentGroupId=3108749798&page=1
-function excludeUrl(href){	
-	return !(href.includes("alibaba.com")
-			//|| href.includes("shopcart") 
-			//|| href.includes("category") 
-			//|| href.includes("page=")
-			|| href.includes("javascrpt")
-			|| href.includes("javascript")
-			|| href.includes("login")
-			|| href.includes("password")
-			|| href.includes("email")
-			|| href.includes("mailto")
-			|| href.includes("msg.")			
-			|| href.includes("32636576ec65e78c67d41892f6dc6f0f")
-			|| href.includes("logout") 
-			|| href.includes("xlogin") 
-			|| href.includes("iframe_delete")
-			|| href.includes("success_proxy")			
-			|| href.includes("security")
-            || href.includes("account")
-            || href.includes("membership")
-        );
+function excludeUrl(href){
+    return !(href.includes("alibaba.com")  ||
+             href.includes("javascrpt") ||
+             href.includes("javascript") ||
+             href.includes("login")  ||
+             href.includes("password") ||
+             href.includes("email") ||
+             href.includes("mailto") ||
+             href.includes("msg.") ||
+             href.includes("32636576ec65e78c67d41892f6dc6f0f") ||
+             href.includes("logout") ||
+             href.includes("xlogin") ||
+             href.includes("iframe_delete") ||
+             href.includes("success_proxy") ||
+             href.includes("security") ||
+             href.includes("account") ||
+             href.includes("membership")
+            );
+    //|| href.includes("shopcart")
+    //|| href.includes("category")
+    //|| href.includes("page=")
 }

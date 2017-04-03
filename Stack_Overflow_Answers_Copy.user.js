@@ -11,7 +11,7 @@
 // @license     http://creativecommons.org/licenses/by-nc-nd/3.0/us/
 // @downloadURL https://github.com/poweredscript/Greasemonkey-Script/raw/master/Stack_Overflow_Answers_Copy.user.js
 // @updateURL   https://github.com/poweredscript/Greasemonkey-Script/raw/master/Stack_Overflow_Answers_Copy.user.js
-// @grant    GM_setClipboard
+// @grant       none
 // ==/UserScript==
 
 //Credit

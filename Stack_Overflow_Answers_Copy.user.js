@@ -3,16 +3,15 @@
 // @namespace   StackOverflow
 // @description Stack Overflow Answers Copy & SOFU Answer Highlighter
 // @copyright   Apichai Pashaiam
-// @version     1.0.0
+// @version     1.2
 // @include     *superuser.com/*
 // @include     *stackoverflow.com/*
 // @include     *stackexchange.com/*
 // @include     *serverfault.com/*
 // @license     http://creativecommons.org/licenses/by-nc-nd/3.0/us/
-// @downloadURL http://userscripts.org/scripts/source/179530.user.js
-// @updateURL   http://userscripts.org/scripts/source/179530.meta.js
-// @version     1.2
-// @grant       none
+// @downloadURL https://github.com/poweredscript/Greasemonkey-Script/raw/master/Stack_Overflow_Answers_Copy.user.js
+// @updateURL   https://github.com/poweredscript/Greasemonkey-Script/raw/master/Stack_Overflow_Answers_Copy.user.js
+// @grant    GM_setClipboard
 // ==/UserScript==
 
 //Credit

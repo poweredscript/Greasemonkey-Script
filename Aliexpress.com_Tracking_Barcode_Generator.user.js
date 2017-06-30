@@ -6,7 +6,7 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
-// @version             1.4
+// @version             1.5
 // @license             Apache
 // @include             *trade.aliexpress.com/order*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -25,7 +25,7 @@
 // Email: poweredscript@gmail.com
 // Website: http://ubotplugin.com
 const qrCode = false;
-function resourceText(url, eleTracking, callback, postfields) {
+function resourceText(url, eleTracking, productNames, callback, postfields) {
     var options = {
         'url': url,
         'method': (!postfields ? 'get' : 'post'),
@@ -34,10 +34,10 @@ function resourceText(url, eleTracking, callback, postfields) {
             'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1) Gecko/20080404'
         },
         'onload': function (e) {
-            callback(e.responseText, eleTracking);
+            callback(e.responseText, eleTracking, productNames);
         },
         'onerror': function (e) {
-            callback(e.responseText, eleTracking);
+            callback(e.responseText, eleTracking, productNames);
         }
     };
 
@@ -67,53 +67,68 @@ function sleepFor(sleepDuration) {
 window.addEventListener("load", pageFullyLoaded);
 function pageFullyLoaded() {
     //http://track.aliexpress.com/logisticsdetail.htm?tradeId=80319479301398
+    //
+    //var orderBodys = document.getElementsByTagName("tbody");
     var orderActions = document.getElementsByClassName("order-action");
-    //alert(orderActions.length);
+    //alert("orderActions = " + orderActions.length);
     for (var i = 0; i < orderActions.length; i++) {
         var orderAction = orderActions[i];
-        var reAddToCarts = orderAction.getElementsByClassName("ui-button ui-button-normal button-reAddToCart");
-        //alert(reAddToCarts.length);break;
-        if (reAddToCarts.length == 0) {
-            var trackings = orderAction.getElementsByClassName("ui-button ui-button-normal button-logisticsTracking");
-            //alert(trackings.length);if(i > 5) break;
-            for (var j = 0; j < trackings.length; j++) {
-                var eleTracking = trackings[j];
-                var trackingId = eleTracking.getAttribute("orderid");
-                //alert(trackingId);
-                if (trackingId != "") {
-                    resourceText('http://track.aliexpress.com/logisticsdetail.htm?tradeId=' + trackingId, eleTracking, function (htmlXRates, eleTrackingOut) {
-                        //alert(htmlXRates);
-                        //var matchs = htmlXRates.match(/Tracking number:<\/div>[\s\S]*?<\/div>[\s\S]*?<\/div>/g);
-                        var matchs = htmlXRates.match(/logisticsNo":".*?"/g);
-                        //logisticsNo":"06170928320"
-                        //alert(matchs.length)
-                        if (matchs.length > 0) {
-                            var result = matchs[0];
-                            result = result.replace(/(logisticsNo":"|")/g, "");
-                            //alert(result);
-                            //result = result.match(/<div class="item msg">.*?<\/div>/g)[0];
-                            //result = result.replace(/(<div class="item msg">|<\/div>)/g, "");
+        //var productNames = orderBodys[i].getElementsByClassName("baobei-name");
+        var productNames2 = [];
+        //for (var j = 0; j < productNames.length; j++) {
+        //    if (j % 2 === 0) {
+        //        productNames2.push(productNames[j].innerText);
+        //    }
+        //}
+        //alert(i + " = " + productNames2.length);
+        //productName = productName.getElementsByClassName("baobei-name");
+        //alert("Count = " + i);
+        var confirmOrderReceived = orderAction.getElementsByClassName("ui-button ui-button-normal button-confirmOrderReceived");
+        //alert("confirmOrderReceived = " + confirmOrderReceived.length);
+        if (confirmOrderReceived.length === 0) continue;
+        var trackings = orderAction.getElementsByClassName("ui-button ui-button-normal button-logisticsTracking");
+        //alert("trackings = " + trackings.length);
+        if (trackings.length === 0) continue;
+        var orderid = trackings[0].getAttribute("orderid");
+        //alert(orderid);
+        if (orderid === "") continue;
+        //continue;
+        try {
+            resourceText('http://track.aliexpress.com/logisticsdetail.htm?tradeId=' + orderid, orderAction, productNames2, function (htmlXRates, eleTrackingOut, productNamesOut) {
+                //alert(htmlXRates);
+                //alert(productNamesOut[0]);
+                //var matchs = htmlXRates.match(/Tracking number:<\/div>[\s\S]*?<\/div>[\s\S]*?<\/div>/g);
+                var trackingNumber = htmlXRates.match(/logisticsNo":".*?"/g);
+                //var logisticsCompanyName = htmlXRates.match(/logisticsCompanyName":".*?"/g)[0].replace(/(logisticsCompanyName":"|")/g, "");
+                //var sendTime = htmlXRates.match(/sendTime":".*?"/g)[0].replace(/(sendTime":"|")/g, "");
+                //var tradeId = htmlXRates.match(/tradeId":".*?"/g)[0].replace(/(tradeId":"|")/g, "");
+                //alert(trackingNumber.length);
+                if (trackingNumber.length > 0) {
+                    trackingNumber = trackingNumber[0].replace(/(logisticsNo":"|")/g, "");
+                    var eleTrackingParent = eleTrackingOut.parentElement;
+                    var img = document.createElement("div");
+                    var url = "";
+                    var style = "";
+                    if (qrCode) {
+                        url = "http://www.qr-code-generator.com/phpqrcode/getCode.php?cht=qr&chs=150x150&choe=UTF-8&chld=L|0&chl=" + trackingNumber;
+                        style = 'style="width:150px;height:150px;"';
+                    } else {
+                        url = "http://www.barcode-generator.org/zint/api.php?bc_number=20&bc_data=" + trackingNumber;
+                        style = 'style="height:95px;"';
+                    }
+                    img.innerHTML = '<a href="https://global.cainiao.com/detail.htm?mailNoList=' + trackingNumber + '"><img alt="' + trackingNumber + '" src="' + url + '" ' + style + '></a>'
+                    eleTrackingParent.appendChild(img);
 
-                            if (result.length > 5) {
-                                var eleTrackingParent = eleTrackingOut.parentElement;
-                                var img = document.createElement("img");
-                                if (qrCode) {
-                                    img.src = "http://www.qr-code-generator.com/phpqrcode/getCode.php?cht=qr&chs=150x150&choe=UTF-8&chld=L|0&chl=" + result;
-                                    img.style.width = "150px";
-                                    img.style.height = "150px";
-                                } else {
-                                    img.src = "http://www.barcode-generator.org/zint/api.php?bc_number=20&bc_data=" + result;
-                                    img.style.height = "95px";
-                                }
-                                img.alt = result;
-                                img.title = result;
-                                eleTrackingParent.appendChild(img);
-                            }
-                        }
-                       
-                    });
+                    var p = document.createElement("div");
+                    p.innerText = trackingNumber;
+                    //p.innerText = productNamesOut.join(" + ") + "," + trackingNumber + "," + logisticsCompanyName;
+                    //eleTrackingParent.appendChild(p);
+                    document.body.appendChild(p);
+
                 }
-            }
-        }
+            }, "get");
+        } catch (e) {
+            alert(e);
+        } 
     }
 }

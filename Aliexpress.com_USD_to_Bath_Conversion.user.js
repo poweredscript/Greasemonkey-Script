@@ -2,15 +2,13 @@
 // @name                Aliexpress.com USD to Bath Conversion
 // @namespace        http://ubotplugin.com
 // @description         Aliexpress.com USD to Bath Conversion
-// @copyright           @2016
-// @author  	            Apichai Pashaiam
-// @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version             2.2
-// @license             Apache
+// @author  	        Apichai Pashaiam
+// @downloadURL    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
+// @updateURL 	     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
+// @version             2.3
 // @include             *aliexpress.com/*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
-// @run-at 	          document-idle
+// @run-at 	            document-end
 // @grant               GM_xmlhttpRequest
 // @grant               GM_getResourceText
 // @grant               GM_getResourceURL
@@ -19,7 +17,7 @@
 // @grant               GM_openInTab
 // @grant               GM_registerMenuCommand
 // @grant               GM_addStyle
-// @grant	          GM_log
+// @grant	            GM_log
 // @grant               unsafeWindow
 
 // ==/UserScript==
@@ -27,7 +25,7 @@
 // Website: http://ubotplugin.com
 //https://bit.ly/2g1mTAG
 //https://redirect.viglink.com?key=32636576ec65e78c67d41892f6dc6f0f&u=https%3A%2F%2Fwww.aliexpress.com%2F
-
+//document-idle
 
 const source = "USD"; //สกุลเงินที่จะแปลง
 const taget = "THB"; //สกุลเงินที่จะแปลงไป
@@ -47,7 +45,7 @@ var ShippingFreeTrackedNotWork = "#556B2F";//"#32CD32";
 var ShippingChargeTrackedWork = "#FF0000";
 
 
-const debug = false; //
+const debug = true; //
 var runOneShipping = true;
 var htmlXRates = "";
 var baht = 0;
@@ -202,14 +200,18 @@ function getElementByAttribute(attr, value, root) {
 }
 function evaluateXPath(parent, xpath)
 {
-  let results = [];
-  let query = document.evaluate(xpath,
-      parent || document,
-      null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-  for (let i=0, length=query.snapshotLength; i<length; ++i) {
-    results.push(query.snapshotItem(i));
-  }
-  return results;
+    let results = [];
+    let query = document.evaluate(xpath, parent || document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    for (let i=0, length=query.snapshotLength; i<length; ++i) {
+        results.push(query.snapshotItem(i));
+    }
+    if(results.length === 0){
+         query = top.document.evaluate(xpath, top.document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+         for (let i=0, length=query.snapshotLength; i<length; ++i) {
+             results.push(query.snapshotItem(i));
+         }
+     }
+    return results;
 }
 function hideEle(xPath){
     var eles = evaluateXPath(document, xPath);
@@ -260,13 +262,14 @@ function findAncestor(el, maxLayer) {
     return el;
 }
 
-function urlCheck() {
-    var href = window.location.href;
-    return (href.includes("wholesale") ||
-            href.includes("SearchText") ||
-            href.includes("wishlist") ||
-            href.includes("category"));
-}
+function urlCheck() { var href = window.location.href;
+                     return (href.includes("wholesale") ||
+                             href.includes("SearchText") ||
+                             href.includes("wishlist") ||
+                             href.includes("category") ||
+                             href.includes("/af/") ||
+                             href.includes("/item/"));
+                    }
 
 function converterAllToThb(xPath) {
     try {
@@ -274,7 +277,7 @@ function converterAllToThb(xPath) {
         var shippingPrice = null;
 
         var eles = evaluateXPath(document, xPath);
-        //alert(eles.length);
+        //alert(xPath + " = " + eles.length);
         var href = window.location.href;
         for (var i = 0; i < eles.length; i++) {
             var ele = eles[i];
@@ -284,9 +287,10 @@ function converterAllToThb(xPath) {
             //    continue;
             //}
             if (includeShippingPrice) {
+                //alert(window.location.href);
+
                 if (urlCheck())
                 {
-                    //alert(href);
                     var eleParentNode = findAncestor(ele, 5);
                     if (eleParentNode === null) {
                         //alert("erro null");
@@ -627,6 +631,7 @@ function checkTHB()
         converterAllToThb('//*[@class="value"]');
         converterAllToThb('//*[@class="notranslate"]');
         converterAllToThb('//*[@class="value notranslate"]');
+        //converterAllToThb('//*[@class="total-price-show"]');
         // Contains Source Symbol notranslate
         converterAllToThb('//*[contains(text(),"' + sourceSymbol + '")]');
         hideEle('//*[@itemprop="priceCurrency"]');
@@ -725,35 +730,6 @@ function windowOnload() {
                 };
                 observer.observe(target, config);
             }
-            //
-            //if (href.includes("/item/"))
-            //{
-            //    var target2 = document.getElementsByClassName('ui-window ui-window-normal ui-window-transition');
-            //    if (target2.length > 0)
-            //    {
-            //        var config = {
-            //            attributes: true,
-            //            childList: true,
-            //            characterData: true,
-            //            subtree: true
-            //            //attributeFilter : ['style']
-            //        };
-            //        observer.observe(target2[0], config);
-            //    }
-            //    var target3 = document.getElementsByClassName('ui-window ui-window-normal ui-window-transition ui-add-shopcart-dialog');
-            //    if (target3.length > 0)
-            //    {
-            //        var config = {
-            //            attributes: true,
-            //            childList: true,
-            //            characterData: true,
-            //            subtree: true
-            //            //attributeFilter : ['style']
-            //        };
-            //        observer.observe(target3[0], config);
-            //    }
-            //}
-
             // On scroll
             window.onscroll = function () {
                 if (href.includes("sale.aliexpress.com")) {
@@ -761,39 +737,12 @@ function windowOnload() {
                 }
             };
         });
-        //var allUrls = evaluateXPath(document, "//a");
-        //for (var i = 0; i < allUrls.length; i++) {
-        //    var url = allUrls[i];
-        //    var href = url.href;
-        //    if (!(!excludeUrl(href)
-        //        || href.includes("&g=n&")
-        //        || href.includes("&g=y&")
-        //        || href.includes("SortType")
-        //        || href.includes("order_list.htm")
-        //        || href.includes("mobileRechargeList.htm")
-        //        || href.includes("issue_list.htm")
-        //        || href.includes("orderTrash.htm")
-        //        || href.includes("feedbackBuyerList.htm")
-        //        || href.includes("coupon/listView.htm")
-        //        || href.includes("shoppingcoupon.htm")
-        //        || href.includes("buyerGainedGiftCardList.htm")
-        //        || href.includes("addressList.htm")
-        //        || href.includes("myTraceProductList.htm")
-        //        || href.includes("buyerCouponList.htm")
-        //        || href.includes("ForderList.htm")
-        //        || href.includes("reportIndex.htm")
-        //        || href.includes("orderList.htm")
-        //        || href.includes("home.aliexpress.com")
-        //        || href.includes("my.aliexpress.com")
-        //        )) {
-        //        url.setAttribute('target', '_blank');
-        //    }
-        //}
+
     } catch (err) {
         if (debug) alert("Error at window.onload\n\n" + err.message);
     }
 }
-//https://my.aliexpress.com/wishlist/wish_list_product_list.htm?&currentGroupId=3108749798&page=1
+
 function excludeUrl(href){
     return !(href.includes("alibaba.com")  ||
              href.includes("javascrpt") ||
@@ -812,7 +761,4 @@ function excludeUrl(href){
              href.includes("account") ||
              href.includes("membership")
             );
-    //|| href.includes("shopcart")
-    //|| href.includes("category")
-    //|| href.includes("page=")
 }

@@ -5,7 +5,7 @@
 // @author  	        Apichai Pashaiam
 // @downloadURL    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @updateURL 	     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version             2.3
+// @version             2.4
 // @include             *aliexpress.com/*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
 // @run-at 	            document-end
@@ -341,9 +341,10 @@ function converterAllToThb(xPath) {
                                 //+ Include Processing Time
                                 if (includeProcessingTime) {
                                     var times = time.split("-");
-                                    var timeStart = parseInt(times[0]) + parseInt(processingTime);
-                                    var timeEnd = parseInt(times[1]) + parseInt(processingTime);
-                                    time = timeStart + "-" + timeEnd + " วัน";
+                                    var timeStart = times[0];//parseInt(times[0]) + parseInt(processingTime);
+                                    var timeEnd = times[1];//parseInt(times[1]) + parseInt(processingTime);
+                                    time = timeStart + "-" + timeEnd + " วัน (จัดส่งใน " + processingTime + " วัน)";
+                                    //time = timeStart + "-" + timeEnd + " วัน";
                                 }
                                 var report = "";
                                 if (price == "0") {
@@ -461,9 +462,10 @@ function converterAllToThb(xPath) {
                                     if (includeProcessingTime) {
                                         //alert(time);
                                         var times2 = time.split("-");
-                                        var timeStart = parseInt(times2[0]) + parseInt(processingTime);
-                                        var timeEnd = parseInt(times2[1]) + parseInt(processingTime);
-                                        time = timeStart + "-" + timeEnd + " วัน";
+                                        var timeStart = times[0];//parseInt(times[0]) + parseInt(processingTime);
+                                        var timeEnd = times[1];//parseInt(times[1]) + parseInt(processingTime);
+                                        time = timeStart + "-" + timeEnd + " วัน (จัดส่งใน " + processingTime + " วัน)";
+                                        //time = timeStart + "-" + timeEnd + " วัน";
                                     }
                                     if (price == "0") {
                                         if (isTracked == "true") {

@@ -5,7 +5,7 @@
 // @author  	        Apichai Pashaiam
 // @downloadURL    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @updateURL 	     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version             2.4
+// @version             2.5
 // @include             *aliexpress.com/*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
 // @run-at 	            document-end
@@ -39,10 +39,12 @@ const hideShippingCost = true; // ถ้าคุณเลือก "includeShip
 const showShippingBy = true;  //แสดงชื่อบริษัทขนส่ง
 const includeProcessingTime = true; //รวมเวลาบรรจุสินค้าก่อนส่ง
 const showPiecesPerLot = true; // แสดงจำนวนต่อ Lot
+const blacklistStore = ["Professional semiconductor suppliers", "nogap4us", "XXX"]; // blacklist ร้านค้า
 
-var ShippingFreeTrackedWork = "#008000";
-var ShippingFreeTrackedNotWork = "#556B2F";//"#32CD32";
-var ShippingChargeTrackedWork = "#FF0000";
+const ShippingFreeTrackedWork = "#008000";
+const ShippingFreeTrackedNotWork = "#556B2F";//"#32CD32";
+const ShippingChargeTrackedWork = "#FF0000";
+const blacklistStoreColor = "#FF0000";
 
 
 const debug = true; //
@@ -220,9 +222,11 @@ function hideEle(xPath){
 
 function findParentNode(className, childObj) {
     var testObj = childObj.parentNode;
-    while ((testObj.className + "") != className && testObj !== null)
+    var i = 0;
+    while (testObj !== null && (testObj.className + "") !== className &&  i < 10)
     {
         testObj = testObj.parentNode;
+        i = i + 1;
     }
     return testObj;
 }
@@ -286,6 +290,7 @@ function converterAllToThb(xPath) {
             //if (ele.className == "p-unit-lot-disc" || ele.className == "promotion-title") {
             //    continue;
             //}
+
             if (includeShippingPrice) {
                 //alert(window.location.href);
 
@@ -312,6 +317,8 @@ function converterAllToThb(xPath) {
                     }
                     //alert(products.length);
                     //break;
+                    //เรทของผู้ขาย
+                    //https://feedback.aliexpress.com/display/evaluationDsrAjaxService.htm?callback=jQuery18304115285631803023_1518235247757&ownerAdminSeq=220820613
 
                     if (products.length > 0) {
                         var productUrl = products[0].href + "";
@@ -321,15 +328,23 @@ function converterAllToThb(xPath) {
                         resourceText("https://freight.aliexpress.com/ajaxFreightCalculateService.htm?f=d&productid=" + productId +
                                      "&count=1&currencyCode=USD&sendGoodsCountry=CN&country=TH&province=&city=&abVersion=1", ele, eleParentNode, function (htmlXRates, eleOut, eleOut2) {
                             //alert(htmlXRates);
-                            var companyDisplayName = (htmlXRates.match(/"companyDisplayName":".*?"/) + "")
-                            .replace(/(companyDisplayName|"|:|,)/ig, "");
+                            //var company = (htmlXRates.match(/"company":".*?"/) + "").replace(/(company|"|:|,)/ig, "");
+                            var companyDisplayName = (htmlXRates.match(/"companyDisplayName":".*?"/) + "").replace(/(companyDisplayName|"|:|,)/ig, "");
                             var time = (htmlXRates.match(/"time":".*?"/) + "").replace(/[^\d\-]/ig, "");
                             var processingTime = (htmlXRates.match(/"processingTime":.*?,/) + "").replace(/[^\d]/ig, "");
                             var price = (htmlXRates.match(/"price":"[\d\.\,]+"/) + "").replace(/[^\d\.]/ig, "");
                             var localPriceFormatStr = (htmlXRates.match(/"localPriceFormatStr":".*?"/) + "").replace(/(localPriceFormatStr|"|:|,)/ig, "");
                             var isTracked = (htmlXRates.match(/"isTracked":.*?,/g)[0] + "").replace(/(isTracked|"|:|,)/ig, "");
-                            //alert(price);
-                            //return;
+                            var eleParentNode = findAncestor(eleOut, 20);
+                            if(eleParentNode !== null){
+                                var store = eleParentNode.getElementsByClassName("store  notranslate")[0];
+                                if(blacklistStore.includes(store.innerText)){
+                                    eleParentNode.style.backgroundColor = blacklistStoreColor;
+                                }
+                            }
+                              //alert(stroe.innerHTML);
+                                //prompt("Copy to clipboard: Ctrl+C, Enter", store.innerText);//innerHTML  innerText
+                          //  return;
                             if (price != "0") {
                                 changeTextContent(eleOut, parseToFloat(price));
                             } else {
@@ -455,7 +470,15 @@ function converterAllToThb(xPath) {
                                 var processingTime = (processingTimes[j] + "").replace(/[^\d]/ig, "");
                                 var price = (prices[j] + "").replace(/[^\d\.\,]/ig, "");
                                 var isTracked = (isTrackeds[j] + "").replace(/(isTracked|"|:|,)/ig, "");
-                                //alert(price);
+                                   if(eleParentNode !== null){
+                                var store = eleParentNode.getElementsByClassName("store  notranslate")[0];
+                                if(blacklistStore.includes(store.innerText)){
+                                    eleParentNode.style.backgroundColor = blacklistStoreColor;
+                                }
+                            }
+                              //alert(stroe.innerHTML);
+                                //prompt("Copy to clipboard: Ctrl+C, Enter", store.innerText);//innerHTML  innerText
+                          //  return;
                                 //+ Show Shipping By
                                 if (showShippingBy) {
                                     //+ Include Processing Time

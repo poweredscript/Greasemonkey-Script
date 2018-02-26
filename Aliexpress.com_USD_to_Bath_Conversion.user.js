@@ -48,7 +48,7 @@ const blacklistStore = ["Professional semiconductor suppliers", "nogap4us", "XXX
 const ShippingFreeTrackedWork = "#008000";
 const ShippingFreeTrackedNotWork = "#556B2F";//"#32CD32";
 const ShippingChargeTrackedWork = "#FF0000";
-const blacklistStoreColor = "#FF0000";
+const blacklistStoreColor = "#000000";//FF0000
 
 
 const debug = true; //
@@ -362,7 +362,7 @@ function converterAllToThb(xPath) {
                                     var times = time.split("-");
                                     var timeStart = times[0];//parseInt(times[0]) + parseInt(processingTime);
                                     var timeEnd = times[1];//parseInt(times[1]) + parseInt(processingTime);
-                                    time = timeStart + "-" + timeEnd + " วัน (จัดส่งใน " + (parseInt(processingTime) + Math.floor((parseInt(processingTime) / 7) * 2)) + " วัน)";
+                                    time = timeStart + "-" + timeEnd + " วัน (แพ็คของ " + (parseInt(processingTime) + Math.floor((parseInt(processingTime) / 7) * 2)) + " วัน)";
                                     //time = timeStart + "-" + timeEnd + " วัน";
                                 }
                                 var report = "";
@@ -491,7 +491,7 @@ function converterAllToThb(xPath) {
                                         var times2 = time.split("-");
                                         var timeStart = times[0];//parseInt(times[0]) + parseInt(processingTime);
                                         var timeEnd = times[1];//parseInt(times[1]) + parseInt(processingTime);
-                                        time = timeStart + "-" + timeEnd + " วัน (จัดส่งใน " + (parseInt(processingTime) + Math.floor((parseInt(processingTime) / 7) * 2)) + " วัน)";
+                                        time = timeStart + "-" + timeEnd + " วัน (แพ็คของ " + (parseInt(processingTime) + Math.floor((parseInt(processingTime) / 7) * 2)) + " วัน)";
                                         //time = timeStart + "-" + timeEnd + " วัน";
                                     }
                                     if (price == "0") {

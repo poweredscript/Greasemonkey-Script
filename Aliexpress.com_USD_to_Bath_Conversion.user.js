@@ -5,7 +5,7 @@
 // @author  	        Apichai Pashaiam
 // @downloadURL    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
 // @updateURL 	     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_USD_to_Bath_Conversion.user.js
-// @version             2.5
+// @version             2.6
 // @include             *aliexpress.com/*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
 // @run-at 	            document-end
@@ -40,6 +40,10 @@ const showShippingBy = true;  //แสดงชื่อบริษัทขน
 const includeProcessingTime = true; //รวมเวลาบรรจุสินค้าก่อนส่ง
 const showPiecesPerLot = true; // แสดงจำนวนต่อ Lot
 const blacklistStore = ["Professional semiconductor suppliers", "nogap4us", "XXX"]; // blacklist ร้านค้า
+
+//https://feedback.aliexpress.com/display/evaluationDsrAjaxService.htm?callback=jQuery18303251972895479365_1519560198069&ownerAdminSeq=221854096
+//https://hotproducts.aliexpress.com/wsproduct-openapi-server.html?ak=1234567890&pid=32798053969,32855207699,32333150335,32337591491,32336565721,32333146472,32767169246,2055097301&site=glo&callback=jQuery183040679219607827877_1519560108956&_=1519560170989
+//https://www.aliexpress.com/product/recommend.htm?productId=32841145533&sceneId=2056&categoryId=400101&companyId=231735716
 
 const ShippingFreeTrackedWork = "#008000";
 const ShippingFreeTrackedNotWork = "#556B2F";//"#32CD32";
@@ -358,7 +362,7 @@ function converterAllToThb(xPath) {
                                     var times = time.split("-");
                                     var timeStart = times[0];//parseInt(times[0]) + parseInt(processingTime);
                                     var timeEnd = times[1];//parseInt(times[1]) + parseInt(processingTime);
-                                    time = timeStart + "-" + timeEnd + " วัน (จัดส่งใน " + processingTime + " วัน)";
+                                    time = timeStart + "-" + timeEnd + " วัน (จัดส่งใน " + (parseInt(processingTime) + Math.floor((parseInt(processingTime) / 7) * 2)) + " วัน)";
                                     //time = timeStart + "-" + timeEnd + " วัน";
                                 }
                                 var report = "";
@@ -487,7 +491,7 @@ function converterAllToThb(xPath) {
                                         var times2 = time.split("-");
                                         var timeStart = times[0];//parseInt(times[0]) + parseInt(processingTime);
                                         var timeEnd = times[1];//parseInt(times[1]) + parseInt(processingTime);
-                                        time = timeStart + "-" + timeEnd + " วัน (จัดส่งใน " + processingTime + " วัน)";
+                                        time = timeStart + "-" + timeEnd + " วัน (จัดส่งใน " + (parseInt(processingTime) + Math.floor((parseInt(processingTime) / 7) * 2)) + " วัน)";
                                         //time = timeStart + "-" + timeEnd + " วัน";
                                     }
                                     if (price == "0") {

@@ -6,7 +6,7 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
-// @version             1.5
+// @version             1.6
 // @license             Apache
 // @include             *trade.aliexpress.com/order*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -43,7 +43,7 @@ function resourceText(url, eleTracking, productNames, callback, postfields) {
 
     if (!!postfields) {
         var postdata = '';
-        for (n in postfields) {
+        for (var n in postfields) {
             postdata += '&' + n + '=' + encodeURIComponent(postfields[n]);
         }
         data = postdata.substr(1);
@@ -116,19 +116,20 @@ function pageFullyLoaded() {
                         url = "http://www.barcode-generator.org/zint/api.php?bc_number=20&bc_data=" + trackingNumber;
                         style = 'style="height:95px;"';
                     }
-                    img.innerHTML = '<a href="https://global.cainiao.com/detail.htm?mailNoList=' + trackingNumber + '"><img alt="' + trackingNumber + '" src="' + url + '" ' + style + '></a>'
+                    img.innerHTML = '<a target="_blank" href="https://global.cainiao.com/detail.htm?mailNoList=' + trackingNumber + '"><img alt="' + trackingNumber + '" src="' + url + '" ' + style + '></a>';
                     eleTrackingParent.appendChild(img);
 
                     var p = document.createElement("div");
                     p.innerText = trackingNumber;
                     //p.innerText = productNamesOut.join(" + ") + "," + trackingNumber + "," + logisticsCompanyName;
                     //eleTrackingParent.appendChild(p);
-                    document.body.appendChild(p);
+                    document.body.insertBefore(p, document.body.firstChild);
+                    //document.body.appendChild(p);
 
                 }
             }, "get");
         } catch (e) {
             alert(e);
-        } 
+        }
     }
 }

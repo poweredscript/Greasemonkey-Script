@@ -123,13 +123,13 @@ function usdToTHB(usds, shippingPrice) {
 
             if (useSuffixTagetSymbol) {
                 if (showSourcePrice) {
-                    bahtStr = (parseToFloat(val1 * baht)).formatMoney() + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + val1.formatMoney() + ')';
+                    bahtStr = (parseToFloat(val1 * baht)).formatMoney() + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + val1.formatMoney() + ' US)';
                 } else {
                     bahtStr = (parseToFloat(val1 * baht)).formatMoney() + ' ' + suffixTagetSymbol;
                 }
             } else {
                 if (showSourcePrice) {
-                    bahtStr = prefixTagetSymbol + (parseToFloat(val1 * baht)).formatMoney() + ' (' + sourceSymbol + val1.formatMoney() + ')';
+                    bahtStr = prefixTagetSymbol + (parseToFloat(val1 * baht)).formatMoney() + ' (' + sourceSymbol + val1.formatMoney() + ' US)';
                 } else {
                     bahtStr = prefixTagetSymbol + (parseToFloat(val1 * baht).formatMoney());
                 }
@@ -148,13 +148,13 @@ function usdToTHB(usds, shippingPrice) {
                 val2Thb = (val2 * baht).formatMoney();
                 if (useSuffixTagetSymbol) {
                     if (showSourcePrice) {
-                        bahtStr = val1Thb + ' - ' + val2Thb + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + val1.formatMoney() + ' - ' + val2.formatMoney() + ')';
+                        bahtStr = val1Thb + ' - ' + val2Thb + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + val1.formatMoney() + ' - ' + val2.formatMoney() + ' US)';
                     } else {
                         bahtStr = val1Thb + ' - ' + val2Thb + ' ' + suffixTagetSymbol;
                     }
                 } else {
                     if (showSourcePrice) {
-                        bahtStr = prefixTagetSymbol + val1Thb + ' - ' + val2Thb + ' (' + sourceSymbol + val1.formatMoney() + ' - ' + val2.formatMoney() + ')';
+                        bahtStr = prefixTagetSymbol + val1Thb + ' - ' + val2Thb + ' (' + sourceSymbol + val1.formatMoney() + ' - ' + val2.formatMoney() + ' US)';
                     } else {
                         bahtStr = prefixTagetSymbol + val1Thb + ' - ' + val2Thb;
                     }
@@ -168,13 +168,13 @@ function usdToTHB(usds, shippingPrice) {
                 val1Thb = (val1 * baht).formatMoney(0);
                 if (useSuffixTagetSymbol) {
                     if (showSourcePrice) {
-                        bahtStr = val1Thb + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + val1.formatMoney() + ')';
+                        bahtStr = val1Thb + ' ' + suffixTagetSymbol + ' (' + sourceSymbol + val1.formatMoney() + ' US)';
                     } else {
                         bahtStr = val1Thb + ' ' + suffixTagetSymbol;
                     }
                 } else {
                     if (showSourcePrice) {
-                        bahtStr = prefixTagetSymbol + val1Thb + ' (' + sourceSymbol + val1.formatMoney() + ')';
+                        bahtStr = prefixTagetSymbol + val1Thb + ' (' + sourceSymbol + val1.formatMoney() + ' US)';
                     } else {
                         bahtStr = prefixTagetSymbol + val1Thb;
                     }

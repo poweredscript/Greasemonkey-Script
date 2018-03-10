@@ -6,7 +6,7 @@
 // @author  	            Apichai Pashaiam
 // @downloadURL     https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
 // @updateURL 	    https://github.com/poweredscript/Greasemonkey-Script/raw/master/Aliexpress.com_Tracking_Barcode_Generator.user.js
-// @version             1.6
+// @version             1.7
 // @license             Apache
 // @include             *trade.aliexpress.com/order*
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js
@@ -116,7 +116,7 @@ function pageFullyLoaded() {
                         url = "http://www.barcode-generator.org/zint/api.php?bc_number=20&bc_data=" + trackingNumber;
                         style = 'style="height:95px;"';
                     }
-                    img.innerHTML = '<a target="_blank" href="https://global.cainiao.com/detail.htm?mailNoList=' + trackingNumber + '"><img alt="' + trackingNumber + '" src="' + url + '" ' + style + '></a>';
+                    img.innerHTML = '<a target="_blank" href="https://global.cainiao.com/detail.htm?mailNoList=' + trackingNumber + '"><img alt="' + trackingNumber + '" src="' + url + '" ' + style + '>' + trackingNumber + '</a>';
                     eleTrackingParent.appendChild(img);
 
                     var p = document.createElement("div");

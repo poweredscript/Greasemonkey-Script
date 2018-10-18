@@ -34,11 +34,9 @@ function getSelectionText() {
             GM_openInTab("https://www.ebay.com/sch/i.html?_from=R40&_sacat=0&LH_BIN=1&_sop=15&_nkw=" + encodeURIComponent(txt), true);//
             GM_openInTab("https://shopee.co.th/search?order=asc&page=0&sortBy=price&keyword=" + encodeURIComponent(txt), true);
             GM_openInTab("https://www.lazada.co.th/catalog/?_keyori=ss&from=search_history&page=1&sort=priceasc&q=" + encodeURIComponent(txt), true);
-
             //GM_openInTab("" + encodeURIComponent(txt), true);
         }
     }
 searchSelectionText();
-//GM_registerMenuCommand("Search on Stores", searchSelectionText, "h");
 })();
 // ==/UserScript==
